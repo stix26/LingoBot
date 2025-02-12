@@ -74,8 +74,20 @@ setupAuth(app);
     serveStatic(app);
   }
 
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
+  const startServer = (port: number) => {
+    try {
+      server.listen(port, "0.0.0.0", () => {
+        log(`serving on port ${port}`);
+      });
+    } catch (err) {
+      if (err.code === 'EADDRINUSE') {
+        log(`Port ${port} in use, trying ${port + 1}`);
+        startServer(port + 1);
+      } else {
+        throw err;
+      }
+    }
+  };
+
+  startServer(5000);
 })();

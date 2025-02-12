@@ -25,7 +25,11 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+      checkPeriod: 86400000, // 24h
+      stale: false,
+      dispose: (key) => {
+        console.log(`Cleaning up expired session: ${key}`);
+      }
     });
   }
 

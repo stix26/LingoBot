@@ -14,7 +14,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
   useEffect(() => {
     if (isThinking) {
       setExpression("thinking");
-    } else if (sentiment) {
+    } else if (sentiment && typeof sentiment.score === 'number') {
       if (sentiment.score >= 4) {
         setExpression("happy");
       } else if (sentiment.score <= 2) {
