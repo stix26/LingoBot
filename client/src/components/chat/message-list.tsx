@@ -4,6 +4,8 @@ import { Avatar } from "@/components/ui/avatar";
 import { Bot, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import ReactMarkdown from "react-markdown";
+import { motion } from "framer-motion";
 
 interface MessageListProps {
   messages: Message[];
@@ -25,27 +27,51 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {messages.map((message) => (
-        <div
+    <div className="space-y-6">
+      {messages.map((message, index) => (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.1 }}
           key={message.id}
-          className={cn("flex items-start gap-3", {
+          className={cn("flex items-start gap-4", {
             "justify-end": message.role === "user",
           })}
         >
-          <Avatar className={cn("h-10 w-10", { "order-2": message.role === "user" })}>
+          <Avatar 
+            className={cn(
+              "h-10 w-10 ring-2 ring-background shadow-md", 
+              { 
+                "order-2": message.role === "user",
+                "bg-primary text-primary-foreground": message.role === "user",
+                "bg-muted": message.role === "assistant"
+              }
+            )}
+          >
             {message.role === "assistant" ? (
-              <Bot className="h-6 w-6" />
+              <Bot className="h-5 w-5" />
             ) : (
-              <User className="h-6 w-6" />
+              <User className="h-5 w-5" />
             )}
           </Avatar>
-          <Card className={cn("p-4 max-w-[80%]", {
-            "bg-primary text-primary-foreground": message.role === "user",
-          })}>
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          <Card 
+            className={cn(
+              "p-4 max-w-[80%] shadow-md transition-colors", 
+              {
+                "bg-primary text-primary-foreground": message.role === "user",
+                "prose prose-sm dark:prose-invert max-w-none": message.role === "assistant"
+              }
+            )}
+          >
+            {message.role === "assistant" ? (
+              <ReactMarkdown className="text-sm whitespace-pre-wrap">
+                {message.content}
+              </ReactMarkdown>
+            ) : (
+              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            )}
           </Card>
-        </div>
+        </motion.div>
       ))}
     </div>
   );

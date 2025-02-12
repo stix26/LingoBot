@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,42 +15,54 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type ChatSettings, chatSettingsSchema } from "@shared/schema";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 interface SettingsDialogProps {
   settings: ChatSettings;
   onSettingsChange: (settings: ChatSettings) => void;
+  children?: React.ReactNode;
 }
 
 export default function SettingsDialog({
   settings,
   onSettingsChange,
+  children,
 }: SettingsDialogProps) {
+  const [open, setOpen] = useState(false);
   const form = useForm<ChatSettings>({
     resolver: zodResolver(chatSettingsSchema),
     defaultValues: settings,
   });
 
+  const onSubmit = (data: ChatSettings) => {
+    onSettingsChange(data);
+    setOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
-        </Button>
+        {children || (
+          <Button variant="outline" size="icon">
+            <Settings2 className="h-4 w-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Chat Settings</DialogTitle>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Chat Settings
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSettingsChange)}
-            className="space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 pt-4"
           >
             <FormField
               control={form.control}
@@ -61,11 +73,12 @@ export default function SettingsDialog({
                   <FormControl>
                     <Textarea
                       placeholder="Enter system prompt..."
+                      className="min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    This sets the behavior of the AI assistant
+                    Define how the AI assistant should behave
                   </FormDescription>
                 </FormItem>
               )}
@@ -75,7 +88,7 @@ export default function SettingsDialog({
               name="temperature"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Temperature: {field.value}</FormLabel>
+                  <FormLabel>Temperature: {field.value.toFixed(1)}</FormLabel>
                   <FormControl>
                     <Slider
                       min={0}
@@ -83,15 +96,21 @@ export default function SettingsDialog({
                       step={0.1}
                       value={[field.value]}
                       onValueChange={(value) => field.onChange(value[0])}
+                      className="pt-2"
                     />
                   </FormControl>
                   <FormDescription>
-                    Controls randomness in responses
+                    Lower values make responses more focused and deterministic,
+                    higher values make them more creative and varied
                   </FormDescription>
                 </FormItem>
               )}
             />
-            <Button type="submit">Save Changes</Button>
+            <div className="flex justify-end">
+              <Button type="submit" className="w-full sm:w-auto">
+                Save Changes
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>
