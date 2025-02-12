@@ -22,12 +22,16 @@ import {
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { Redirect } from "wouter";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
 
   const form = useForm({
-    resolver: zodResolver(insertUserSchema),
+    resolver: zodResolver(insertUserSchema.extend({
+      username: insertUserSchema.shape.username.min(3, "Username must be at least 3 characters"),
+      password: insertUserSchema.shape.password.min(6, "Password must be at least 6 characters"),
+    })),
     defaultValues: {
       username: "",
       password: "",
@@ -43,15 +47,15 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-8">
         <Tabs defaultValue="login" className="w-full max-w-md">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">Sign In</TabsTrigger>
+            <TabsTrigger value="register">Create Account</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <Card>
               <CardHeader>
                 <CardTitle>Welcome back</CardTitle>
                 <CardDescription>
-                  Sign in to your account to continue
+                  Sign in to your account to continue chatting
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -67,7 +71,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              {...field} 
+                              placeholder="Enter your username"
+                              autoComplete="username"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -80,7 +88,12 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input 
+                              type="password" 
+                              {...field} 
+                              placeholder="Enter your password"
+                              autoComplete="current-password"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -88,7 +101,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending && (
@@ -106,7 +119,7 @@ export default function AuthPage() {
               <CardHeader>
                 <CardTitle>Create an account</CardTitle>
                 <CardDescription>
-                  Sign up to start chatting with our AI assistant
+                  Join us to start chatting with our AI assistant
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -124,7 +137,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              {...field} 
+                              placeholder="Choose a username"
+                              autoComplete="username"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -137,7 +154,12 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input 
+                              type="password" 
+                              {...field} 
+                              placeholder="Choose a password"
+                              autoComplete="new-password"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -145,13 +167,13 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
-                      Sign Up
+                      Create Account
                     </Button>
                   </form>
                 </Form>

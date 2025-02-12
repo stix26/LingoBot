@@ -56,8 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
-        description: error.message,
+        title: "Unable to sign in",
+        description: "Please check your username and password and try again.",
         variant: "destructive",
       });
     },
@@ -71,11 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       setLocation("/");
+      toast({
+        title: "Account created",
+        description: "Welcome! Your account has been created successfully.",
+      });
     },
     onError: (error: Error) => {
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: error.message === "Username already exists" 
+          ? "This username is already taken. Please choose another one."
+          : "There was a problem creating your account. Please try again.",
         variant: "destructive",
       });
     },
@@ -92,8 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Logout failed",
-        description: error.message,
+        title: "Problem signing out",
+        description: "Please try again. If the problem persists, try refreshing the page.",
         variant: "destructive",
       });
     },
