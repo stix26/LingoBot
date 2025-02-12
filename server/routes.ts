@@ -11,6 +11,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.post("/api/messages", async (req, res) => {
+  console.log('Received message request:', req.body);
     const parseResult = insertMessageSchema.safeParse(req.body);
     if (!parseResult.success) {
       return res.status(400).json({ message: "Invalid message format" });
