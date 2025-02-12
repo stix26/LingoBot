@@ -29,6 +29,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Set trust proxy to work with Replit's proxy
+app.set('trust proxy', 1);
+
 // Clear messages on server start
 (async () => {
   try {

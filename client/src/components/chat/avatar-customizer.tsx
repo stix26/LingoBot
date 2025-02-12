@@ -85,21 +85,42 @@ export default function AvatarCustomizer({
                     >
                       <FormItem className="flex items-center space-x-2">
                         <FormControl>
-                          <RadioGroupItem value="circle" />
+                          <RadioGroupItem value="circle" className="peer sr-only" />
                         </FormControl>
-                        <Circle className="h-4 w-4" />
+                        <div className={cn(
+                          "p-2 rounded-lg border-2 hover:border-accent cursor-pointer",
+                          "transition-all duration-200 ease-in-out transform hover:scale-105",
+                          "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5",
+                          "peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/20"
+                        )}>
+                          <Circle className="h-6 w-6" />
+                        </div>
                       </FormItem>
                       <FormItem className="flex items-center space-x-2">
                         <FormControl>
-                          <RadioGroupItem value="squircle" />
+                          <RadioGroupItem value="squircle" className="peer sr-only" />
                         </FormControl>
-                        <Square className="h-4 w-4" />
+                        <div className={cn(
+                          "p-2 rounded-lg border-2 hover:border-accent cursor-pointer",
+                          "transition-all duration-200 ease-in-out transform hover:scale-105",
+                          "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5",
+                          "peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/20"
+                        )}>
+                          <Square className="h-6 w-6" />
+                        </div>
                       </FormItem>
                       <FormItem className="flex items-center space-x-2">
                         <FormControl>
-                          <RadioGroupItem value="hexagon" />
+                          <RadioGroupItem value="hexagon" className="peer sr-only" />
                         </FormControl>
-                        <Hexagon className="h-4 w-4" />
+                        <div className={cn(
+                          "p-2 rounded-lg border-2 hover:border-accent cursor-pointer",
+                          "transition-all duration-200 ease-in-out transform hover:scale-105",
+                          "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5",
+                          "peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/20"
+                        )}>
+                          <Hexagon className="h-6 w-6" />
+                        </div>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
@@ -118,48 +139,29 @@ export default function AvatarCustomizer({
                       defaultValue={field.value}
                       className="grid grid-cols-3 gap-4"
                     >
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroupItem
-                            value="minimal"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <div className={cn(
-                          "rounded-lg border-2 border-muted p-4 hover:border-accent peer-data-[state=checked]:border-primary",
-                          "text-center cursor-pointer"
-                        )}>
-                          Minimal
-                        </div>
-                      </FormItem>
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroupItem
-                            value="cute"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <div className={cn(
-                          "rounded-lg border-2 border-muted p-4 hover:border-accent peer-data-[state=checked]:border-primary",
-                          "text-center cursor-pointer"
-                        )}>
-                          Cute
-                        </div>
-                      </FormItem>
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroupItem
-                            value="robot"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <div className={cn(
-                          "rounded-lg border-2 border-muted p-4 hover:border-accent peer-data-[state=checked]:border-primary",
-                          "text-center cursor-pointer"
-                        )}>
-                          Robot
-                        </div>
-                      </FormItem>
+                      {["minimal", "cute", "robot"].map((style) => (
+                        <FormItem key={style}>
+                          <FormControl>
+                            <RadioGroupItem
+                              value={style}
+                              className="peer sr-only"
+                            />
+                          </FormControl>
+                          <div className={cn(
+                            "rounded-lg border-2 border-muted p-4 hover:border-accent",
+                            "text-center cursor-pointer transition-all duration-200",
+                            "hover:shadow-lg hover:scale-105",
+                            "peer-data-[state=checked]:border-primary",
+                            "peer-data-[state=checked]:bg-primary/5",
+                            "peer-data-[state=checked]:ring-2",
+                            "peer-data-[state=checked]:ring-primary/20",
+                            "peer-data-[state=checked]:shadow-lg",
+                            "peer-data-[state=checked]:scale-105"
+                          )}>
+                            {style.charAt(0).toUpperCase() + style.slice(1)}
+                          </div>
+                        </FormItem>
+                      ))}
                     </RadioGroup>
                   </FormControl>
                 </FormItem>
@@ -177,48 +179,29 @@ export default function AvatarCustomizer({
                       defaultValue={field.value}
                       className="grid grid-cols-3 gap-4"
                     >
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroupItem
-                            value="bounce"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <div className={cn(
-                          "rounded-lg border-2 border-muted p-4 hover:border-accent peer-data-[state=checked]:border-primary",
-                          "text-center cursor-pointer"
-                        )}>
-                          Bounce
-                        </div>
-                      </FormItem>
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroupItem
-                            value="pulse"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <div className={cn(
-                          "rounded-lg border-2 border-muted p-4 hover:border-accent peer-data-[state=checked]:border-primary",
-                          "text-center cursor-pointer"
-                        )}>
-                          Pulse
-                        </div>
-                      </FormItem>
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroupItem
-                            value="wave"
-                            className="peer sr-only"
-                          />
-                        </FormControl>
-                        <div className={cn(
-                          "rounded-lg border-2 border-muted p-4 hover:border-accent peer-data-[state=checked]:border-primary",
-                          "text-center cursor-pointer"
-                        )}>
-                          Wave
-                        </div>
-                      </FormItem>
+                      {["bounce", "pulse", "wave"].map((animation) => (
+                        <FormItem key={animation}>
+                          <FormControl>
+                            <RadioGroupItem
+                              value={animation}
+                              className="peer sr-only"
+                            />
+                          </FormControl>
+                          <div className={cn(
+                            "rounded-lg border-2 border-muted p-4 hover:border-accent",
+                            "text-center cursor-pointer transition-all duration-200",
+                            "hover:shadow-lg hover:scale-105",
+                            "peer-data-[state=checked]:border-primary",
+                            "peer-data-[state=checked]:bg-primary/5",
+                            "peer-data-[state=checked]:ring-2",
+                            "peer-data-[state=checked]:ring-primary/20",
+                            "peer-data-[state=checked]:shadow-lg",
+                            "peer-data-[state=checked]:scale-105"
+                          )}>
+                            {animation.charAt(0).toUpperCase() + animation.slice(1)}
+                          </div>
+                        </FormItem>
+                      ))}
                     </RadioGroup>
                   </FormControl>
                 </FormItem>
@@ -231,8 +214,13 @@ export default function AvatarCustomizer({
                   type="button"
                   variant="outline"
                   className={cn(
-                    "w-full h-12 rounded-lg p-0",
-                    form.getValues("primaryColor") === color.primary && "ring-2 ring-primary"
+                    "w-full h-12 rounded-lg p-0 transition-all duration-200",
+                    "hover:scale-105 hover:shadow-lg",
+                    form.getValues("primaryColor") === color.primary && [
+                      "ring-2 ring-primary",
+                      "scale-105 shadow-lg",
+                      "border-primary"
+                    ]
                   )}
                   onClick={() => {
                     form.setValue("primaryColor", color.primary);
@@ -251,7 +239,7 @@ export default function AvatarCustomizer({
             <div className="flex justify-end">
               <Button
                 type="submit"
-                className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-600"
+                className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700"
               >
                 Save Changes
               </Button>
