@@ -82,7 +82,7 @@ export async function generateChatResponse(
   }
 }
 
-export async function generateConversationStarters(messageHistory: { role: string; content: string }[]): Promise<string[]> {
+export async function generateConversationStarters(messageHistory: { role: "user" | "assistant" | "system"; content: string }[]): Promise<string[]> {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -91,7 +91,10 @@ export async function generateConversationStarters(messageHistory: { role: strin
           role: "system",
           content: "Based on the conversation history, suggest 3 engaging follow-up questions or conversation starters. Return them in a JSON array format. Make suggestions relevant, thought-provoking, and contextual to the ongoing discussion. If there's no history, provide general interesting topics.",
         },
-        ...messageHistory,
+        ...messageHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
         {
           role: "user",
           content: "Generate 3 conversation starters based on our chat.",

@@ -49,7 +49,7 @@ export function registerRoutes(app: express.Express) {
       // Get previous messages for context
       const messages = await storage.getMessages();
       const messageHistory = messages.map(msg => ({
-        role: msg.metadata.role as "user" | "assistant" | "system",
+        role: (msg.metadata as { role: "user" | "assistant" | "system" }).role,
         content: msg.content
       }));
 
@@ -88,7 +88,7 @@ export function registerRoutes(app: express.Express) {
     try {
       const messages = await storage.getMessages();
       const messageHistory = messages.map(msg => ({
-        role: msg.metadata.role as "user" | "assistant" | "system",
+        role: (msg.metadata as { role: "user" | "assistant" | "system" }).role,
         content: msg.content
       }));
 

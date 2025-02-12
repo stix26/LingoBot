@@ -25,10 +25,10 @@ export default function Chat() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ content, settings }: { content: string, settings: ChatSettings }) => {
+    mutationFn: async ({ content, settings }: { content: string; settings: ChatSettings }) => {
       const res = await apiRequest("POST", "/api/messages", {
         content,
-        settings
+        settings,
       });
       return res.json();
     },
@@ -61,13 +61,13 @@ export default function Chat() {
 
   // Get the latest message sentiment
   const latestMessage = messagesQuery.data?.[messagesQuery.data?.length - 1];
-  const latestSentiment = latestMessage?.metadata?.sentiment;
+  const latestSentiment = latestMessage?.metadata as { sentiment?: number };
 
   const handleSuggestionSelect = (suggestion: string) => {
-    const defaultSettings = {
+    const defaultSettings: ChatSettings = {
       temperature: 1,
       systemPrompt: "You are a helpful AI assistant. Provide clear, accurate, and engaging responses. Feel free to use markdown for better formatting.",
-      mode: "general"
+      mode: "general" as const,
     };
     sendMessageMutation.mutate({ content: suggestion, settings: defaultSettings });
   };
@@ -89,13 +89,11 @@ export default function Chat() {
         </div>
       </ScrollArea>
       <MessageInput
-        onSendMessage={(content, settings) =>
-          sendMessageMutation.mutate({ content, settings })
-        }
+        onSendMessage={(content, settings) => sendMessageMutation.mutate({ content, settings })}
         isLoading={sendMessageMutation.isPending}
         onTypingChange={setIsTyping}
       />
-      <Mascot 
+      <Mascot
         sentiment={latestSentiment}
         isTyping={isTyping}
         isThinking={sendMessageMutation.isPending}
