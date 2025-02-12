@@ -37,8 +37,11 @@ export function setupAuth(app: Express) {
     cookie: {
       secure: app.get("env") === "production",
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+      maxAge: 1 * 60 * 60 * 1000, // 1 hour
+      sameSite: 'lax'
+    },
+    name: 'sess', // Change session cookie name
+    rolling: true, // Refresh session with each request
   };
 
   if (app.get("env") === "production") {
@@ -100,30 +103,52 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    // Clear any existing session
+    req.logout((err) => {
       if (err) return next(err);
-      if (!user) {
-        return res.status(401).json({ message: info?.message || "Authentication failed" });
-      }
-      req.login(user, (err) => {
+
+      passport.authenticate("local", (err, user, info) => {
         if (err) return next(err);
-        res.status(200).json(user);
-      });
-    })(req, res, next);
+        if (!user) {
+          return res.status(401).json({ message: info?.message || "Authentication failed" });
+        }
+        req.login(user, (err) => {
+          if (err) return next(err);
+          // Set a new session
+          req.session.regenerate((err) => {
+            if (err) return next(err);
+            res.status(200).json(user);
+          });
+        });
+      })(req, res, next);
+    });
   });
 
   app.post("/api/logout", (req, res, next) => {
+    const sessionID = req.sessionID; // Store session ID before clearing
+
     req.logout((err) => {
       if (err) return next(err);
+
+      // Force session destruction
       req.session.destroy((err) => {
         if (err) return next(err);
-        res.sendStatus(200);
+
+        // Clear session from store
+        storage.sessionStore.destroy(sessionID, (err) => {
+          if (err) console.error('Error destroying session in store:', err);
+          res.clearCookie('sess').sendStatus(200);
+        });
       });
     });
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      // Clear any lingering cookies on authentication failure
+      res.clearCookie('sess');
+      return res.sendStatus(401);
+    }
     res.json(req.user);
   });
 }
