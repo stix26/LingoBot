@@ -6,14 +6,17 @@ import MessageInput from "@/components/chat/message-input";
 import ChatHeader from "@/components/chat/chat-header";
 import Mascot from "@/components/chat/mascot";
 import SuggestionChips from "@/components/chat/suggestion-chips";
-import { type Message, type ChatSettings } from "@shared/schema";
+import AvatarCustomizer from "@/components/chat/avatar-customizer";
+import { type Message, type ChatSettings, type AvatarCustomization } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Chat() {
   const { toast } = useToast();
   const [isTyping, setIsTyping] = useState(false);
+  const { user } = useAuth();
 
   const messagesQuery = useQuery<Message[]>({
     queryKey: ["/api/messages"],
@@ -22,6 +25,20 @@ export default function Chat() {
   const suggestionsQuery = useQuery<string[]>({
     queryKey: ["/api/suggestions"],
     enabled: !!messagesQuery.data?.length, // Only fetch suggestions if there are messages
+  });
+
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (settings: AvatarCustomization) => {
+      const res = await apiRequest("PATCH", "/api/user/avatar", { settings });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Avatar updated",
+        description: "Your AI companion's appearance has been updated.",
+      });
+    },
   });
 
   const sendMessageMutation = useMutation({
@@ -74,7 +91,20 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <ChatHeader onClearChat={() => clearChatMutation.mutate()} />
+      <ChatHeader onClearChat={() => clearChatMutation.mutate()}>
+        <div className="flex items-center gap-2">
+          <AvatarCustomizer
+            settings={user?.avatarSettings || {
+              primaryColor: "hsl(142 76% 36%)",
+              secondaryColor: "hsl(142 76% 46%)",
+              shape: "circle",
+              style: "minimal",
+              animation: "bounce"
+            }}
+            onSettingsChange={(settings) => updateAvatarMutation.mutate(settings)}
+          />
+        </div>
+      </ChatHeader>
       <ScrollArea className="flex-1 px-4 pb-32">
         <MessageList
           messages={messagesQuery.data || []}
@@ -97,6 +127,7 @@ export default function Chat() {
         sentiment={sentiment ? { score: sentiment, confidence: 1 } : undefined}
         isTyping={isTyping}
         isThinking={sendMessageMutation.isPending}
+        customization={user?.avatarSettings}
       />
     </div>
   );

@@ -8,10 +8,27 @@ export const messageMetadataSchema = z.object({
   role: z.enum(["user", "assistant", "system"])
 });
 
+export const avatarCustomizationSchema = z.object({
+  primaryColor: z.string().default("hsl(142 76% 36%)"),
+  secondaryColor: z.string().default("hsl(142 76% 46%)"),
+  shape: z.enum(["circle", "squircle", "hexagon"]).default("circle"),
+  style: z.enum(["minimal", "cute", "robot"]).default("minimal"),
+  animation: z.enum(["bounce", "pulse", "wave"]).default("bounce")
+});
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  avatarSettings: jsonb("avatar_settings").$type<z.infer<typeof avatarCustomizationSchema>>()
+    .default({
+      primaryColor: "hsl(142 76% 36%)",
+      secondaryColor: "hsl(142 76% 46%)",
+      shape: "circle",
+      style: "minimal",
+      animation: "bounce"
+    })
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
@@ -46,3 +63,4 @@ export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type AvatarCustomization = z.infer<typeof avatarCustomizationSchema>;

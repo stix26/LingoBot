@@ -1,4 +1,4 @@
-import { messages, type Message, type InsertMessage, users, type User, type InsertUser } from "@shared/schema";
+import { messages, type Message, type InsertMessage, users, type User, type InsertUser, type AvatarCustomization } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import session from "express-session";
@@ -13,6 +13,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserAvatar(userId: number, settings: AvatarCustomization): Promise<User>;
   sessionStore: session.Store;
 }
 
@@ -71,10 +72,29 @@ export class MemStorage implements IStorage {
       id: this.nextUserId++,
       username: insertUser.username,
       password: insertUser.password,
+      avatarSettings: {
+        primaryColor: "hsl(142 76% 36%)",
+        secondaryColor: "hsl(142 76% 46%)",
+        shape: "circle",
+        style: "minimal",
+        animation: "bounce"
+      },
       createdAt: new Date()
     };
     this.users.push(user);
     return user;
+  }
+
+  async updateUserAvatar(userId: number, settings: AvatarCustomization): Promise<User> {
+    const userIndex = this.users.findIndex(user => user.id === userId);
+    if (userIndex === -1) {
+      throw new Error("User not found");
+    }
+    this.users[userIndex] = {
+      ...this.users[userIndex],
+      avatarSettings: settings
+    };
+    return this.users[userIndex];
   }
 }
 

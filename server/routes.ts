@@ -1,5 +1,5 @@
 import express from "express";
-import { insertMessageSchema, type Message, chatSettings } from "@shared/schema";
+import { insertMessageSchema, type Message, chatSettings, avatarCustomizationSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { analyzeSentiment, generateChatResponse, generateSuggestions } from "./lib/openai";
 import { setupAuth } from "./auth";
@@ -101,6 +101,24 @@ export function registerRoutes(app: express.Express) {
     } catch (error) {
       console.error("Error generating suggestions:", error);
       res.status(500).json({ error: "Failed to generate suggestions" });
+    }
+  });
+
+  // Add new avatar update route
+  app.patch("/api/user/avatar", requireAuth, async (req, res) => {
+    try {
+      const { settings } = req.body;
+      const validatedSettings = avatarCustomizationSchema.parse(settings);
+
+      const user = await storage.updateUserAvatar(req.user!.id, validatedSettings);
+      res.json(user);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({ error: fromZodError(error).message });
+      } else {
+        console.error("Error updating avatar:", error);
+        res.status(500).json({ error: "Failed to update avatar settings" });
+      }
     }
   });
 
