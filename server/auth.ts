@@ -32,16 +32,15 @@ export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET!,
     resave: true,
-    saveUninitialized: false,
+    saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
-      secure: app.get("env") === "production",
+      secure: false, // Set to false for development
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       sameSite: 'lax'
     },
-    name: 'sess',
-    rolling: true,
+    name: 'sid'
   };
 
   if (app.get("env") === "production") {
@@ -56,23 +55,19 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        console.log(`[Auth Debug] Login attempt for username: ${username}`);
         const user = await storage.getUserByUsername(username);
 
         if (!user) {
-          console.log(`[Auth Debug] User not found: ${username}`);
           return done(null, false, { message: "Invalid username or password" });
         }
 
         const isValid = await comparePasswords(password, user.password);
-        console.log(`[Auth Debug] Password validation result: ${isValid}`);
 
         if (!isValid) {
           return done(null, false, { message: "Invalid username or password" });
         }
         return done(null, user);
       } catch (error) {
-        console.error("[Auth Debug] Error in auth strategy:", error);
         return done(error);
       }
     }),
@@ -94,27 +89,15 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      console.log("[Auth Debug] Registration attempt:", {
-        username: req.body.username,
-        hasPassword: !!req.body.password
-      });
-
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
       const hashedPassword = await hashPassword(req.body.password);
-      console.log("[Auth Debug] Password hashed successfully");
-
       const user = await storage.createUser({
         ...req.body,
         password: hashedPassword,
-      });
-
-      console.log("[Auth Debug] User created successfully:", {
-        id: user.id,
-        username: user.username
       });
 
       req.login(user, (err) => {
@@ -122,7 +105,6 @@ export function setupAuth(app: Express) {
         res.status(201).json(user);
       });
     } catch (error) {
-      console.error("[Auth Debug] Registration error:", error);
       next(error);
     }
   });
@@ -141,28 +123,17 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    const sessionID = req.sessionID; // Store session ID before clearing
-
     req.logout((err) => {
       if (err) return next(err);
-
-      // Force session destruction
       req.session.destroy((err) => {
         if (err) return next(err);
-
-        // Clear session from store
-        storage.sessionStore.destroy(sessionID, (err) => {
-          if (err) console.error('Error destroying session in store:', err);
-          res.clearCookie('sess').sendStatus(200);
-        });
+        res.clearCookie('sid').sendStatus(200);
       });
     });
   });
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) {
-      // Clear any lingering cookies on authentication failure
-      res.clearCookie('sess');
       return res.sendStatus(401);
     }
     res.json(req.user);

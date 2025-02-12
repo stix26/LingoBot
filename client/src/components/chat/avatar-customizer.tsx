@@ -62,7 +62,7 @@ export default function AvatarCustomizer({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
             Customize Your AI Companion
           </DialogTitle>
         </DialogHeader>
@@ -83,50 +83,36 @@ export default function AvatarCustomizer({
                       defaultValue={field.value}
                       className="flex gap-4"
                     >
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <RadioGroupItem value="circle" className="peer sr-only" />
-                        </FormControl>
-                        <div className={cn(
-                          "p-2 rounded-lg border-2 hover:border-accent cursor-pointer",
-                          "transition-all duration-200 ease-in-out transform hover:scale-105",
-                          "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5",
-                          "peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/20"
-                        )}>
-                          <Circle className="h-6 w-6" />
-                        </div>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <RadioGroupItem value="squircle" className="peer sr-only" />
-                        </FormControl>
-                        <div className={cn(
-                          "p-2 rounded-lg border-2 hover:border-accent cursor-pointer",
-                          "transition-all duration-200 ease-in-out transform hover:scale-105",
-                          "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5",
-                          "peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/20"
-                        )}>
-                          <Square className="h-6 w-6" />
-                        </div>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <RadioGroupItem value="hexagon" className="peer sr-only" />
-                        </FormControl>
-                        <div className={cn(
-                          "p-2 rounded-lg border-2 hover:border-accent cursor-pointer",
-                          "transition-all duration-200 ease-in-out transform hover:scale-105",
-                          "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5",
-                          "peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/20"
-                        )}>
-                          <Hexagon className="h-6 w-6" />
-                        </div>
-                      </FormItem>
+                      {[
+                        { value: "circle", icon: Circle },
+                        { value: "squircle", icon: Square },
+                        { value: "hexagon", icon: Hexagon },
+                      ].map(({ value, icon: Icon }) => (
+                        <FormItem key={value} className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem value={value} className="peer sr-only" />
+                          </FormControl>
+                          <div className={cn(
+                            "p-3 rounded-lg border-2 hover:border-accent cursor-pointer",
+                            "transition-all duration-200 ease-in-out transform hover:scale-105",
+                            "hover:bg-accent/5",
+                            "data-[state=checked]:border-primary data-[state=checked]:bg-primary/5",
+                            "data-[state=checked]:ring-2 data-[state=checked]:ring-primary/20",
+                            "data-[state=checked]:scale-110",
+                            "peer-checked:border-primary peer-checked:bg-primary/5",
+                            "peer-checked:ring-2 peer-checked:ring-primary/20",
+                            "peer-checked:scale-110"
+                          )}>
+                            <Icon className="h-6 w-6" />
+                          </div>
+                        </FormItem>
+                      ))}
                     </RadioGroup>
                   </FormControl>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="style"
@@ -148,15 +134,16 @@ export default function AvatarCustomizer({
                             />
                           </FormControl>
                           <div className={cn(
-                            "rounded-lg border-2 border-muted p-4 hover:border-accent",
+                            "rounded-lg border-2 border-muted p-4",
                             "text-center cursor-pointer transition-all duration-200",
+                            "hover:border-accent hover:bg-accent/5",
                             "hover:shadow-lg hover:scale-105",
-                            "peer-data-[state=checked]:border-primary",
-                            "peer-data-[state=checked]:bg-primary/5",
-                            "peer-data-[state=checked]:ring-2",
-                            "peer-data-[state=checked]:ring-primary/20",
-                            "peer-data-[state=checked]:shadow-lg",
-                            "peer-data-[state=checked]:scale-105"
+                            "data-[state=checked]:border-primary data-[state=checked]:bg-primary/5",
+                            "data-[state=checked]:ring-2 data-[state=checked]:ring-primary/20",
+                            "data-[state=checked]:scale-110",
+                            "peer-checked:border-primary peer-checked:bg-primary/5",
+                            "peer-checked:ring-2 peer-checked:ring-primary/20",
+                            "peer-checked:scale-110"
                           )}>
                             {style.charAt(0).toUpperCase() + style.slice(1)}
                           </div>
@@ -167,6 +154,7 @@ export default function AvatarCustomizer({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="animation"
@@ -188,15 +176,16 @@ export default function AvatarCustomizer({
                             />
                           </FormControl>
                           <div className={cn(
-                            "rounded-lg border-2 border-muted p-4 hover:border-accent",
+                            "rounded-lg border-2 border-muted p-4",
                             "text-center cursor-pointer transition-all duration-200",
+                            "hover:border-accent hover:bg-accent/5",
                             "hover:shadow-lg hover:scale-105",
-                            "peer-data-[state=checked]:border-primary",
-                            "peer-data-[state=checked]:bg-primary/5",
-                            "peer-data-[state=checked]:ring-2",
-                            "peer-data-[state=checked]:ring-primary/20",
-                            "peer-data-[state=checked]:shadow-lg",
-                            "peer-data-[state=checked]:scale-105"
+                            "data-[state=checked]:border-primary data-[state=checked]:bg-primary/5",
+                            "data-[state=checked]:ring-2 data-[state=checked]:ring-primary/20",
+                            "data-[state=checked]:scale-110",
+                            "peer-checked:border-primary peer-checked:bg-primary/5",
+                            "peer-checked:ring-2 peer-checked:ring-primary/20",
+                            "peer-checked:scale-110"
                           )}>
                             {animation.charAt(0).toUpperCase() + animation.slice(1)}
                           </div>
@@ -207,6 +196,7 @@ export default function AvatarCustomizer({
                 </FormItem>
               )}
             />
+
             <div className="grid grid-cols-5 gap-2">
               {COLORS.map((color) => (
                 <Button
@@ -216,9 +206,10 @@ export default function AvatarCustomizer({
                   className={cn(
                     "w-full h-12 rounded-lg p-0 transition-all duration-200",
                     "hover:scale-105 hover:shadow-lg",
+                    "focus:ring-2 focus:ring-primary focus:ring-offset-2",
                     form.getValues("primaryColor") === color.primary && [
-                      "ring-2 ring-primary",
-                      "scale-105 shadow-lg",
+                      "ring-2 ring-primary ring-offset-2",
+                      "scale-110 shadow-lg",
                       "border-primary"
                     ]
                   )}
@@ -236,10 +227,11 @@ export default function AvatarCustomizer({
                 </Button>
               ))}
             </div>
+
             <div className="flex justify-end">
               <Button
                 type="submit"
-                className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700"
+                className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium"
               >
                 Save Changes
               </Button>
