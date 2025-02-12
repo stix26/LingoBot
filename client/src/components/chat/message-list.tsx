@@ -27,7 +27,7 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-4">
       {messages.map((message, index) => (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -43,8 +43,8 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
               "h-10 w-10 ring-2 ring-background shadow-md", 
               { 
                 "order-2": message.role === "user",
-                "bg-primary text-primary-foreground": message.role === "user",
-                "bg-muted": message.role === "assistant"
+                "bg-gradient-to-br from-violet-600 to-indigo-600 text-white": message.role === "user",
+                "bg-gradient-to-br from-pink-500 to-rose-500 text-white": message.role === "assistant"
               }
             )}
           >
@@ -56,10 +56,10 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
           </Avatar>
           <Card 
             className={cn(
-              "p-4 max-w-[80%] shadow-md transition-colors", 
+              "p-4 max-w-[80%] shadow-lg transition-colors", 
               {
-                "bg-primary text-primary-foreground": message.role === "user",
-                "prose prose-sm dark:prose-invert max-w-none": message.role === "assistant"
+                "bg-gradient-to-r from-violet-600 to-indigo-600 text-white": message.role === "user",
+                "bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl": message.role === "assistant"
               }
             )}
           >
