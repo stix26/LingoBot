@@ -6,6 +6,7 @@ server/public
 
 # Build files
 *.tar.gz
+*.zip
 vite.config.ts.*
 
 # Environment files
@@ -50,3 +51,6 @@ coverage
 
 # Archives
 *.zip
+*.gz
+*.tar
+*.rar
