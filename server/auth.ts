@@ -56,12 +56,23 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        console.log(`[Auth Debug] Login attempt for username: ${username}`);
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
+
+        if (!user) {
+          console.log(`[Auth Debug] User not found: ${username}`);
+          return done(null, false, { message: "Invalid username or password" });
+        }
+
+        const isValid = await comparePasswords(password, user.password);
+        console.log(`[Auth Debug] Password validation result: ${isValid}`);
+
+        if (!isValid) {
           return done(null, false, { message: "Invalid username or password" });
         }
         return done(null, user);
       } catch (error) {
+        console.error("[Auth Debug] Error in auth strategy:", error);
         return done(error);
       }
     }),
@@ -83,14 +94,27 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
+      console.log("[Auth Debug] Registration attempt:", {
+        username: req.body.username,
+        hasPassword: !!req.body.password
+      });
+
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
+      const hashedPassword = await hashPassword(req.body.password);
+      console.log("[Auth Debug] Password hashed successfully");
+
       const user = await storage.createUser({
         ...req.body,
-        password: await hashPassword(req.body.password),
+        password: hashedPassword,
+      });
+
+      console.log("[Auth Debug] User created successfully:", {
+        id: user.id,
+        username: user.username
       });
 
       req.login(user, (err) => {
@@ -98,6 +122,7 @@ export function setupAuth(app: Express) {
         res.status(201).json(user);
       });
     } catch (error) {
+      console.error("[Auth Debug] Registration error:", error);
       next(error);
     }
   });
