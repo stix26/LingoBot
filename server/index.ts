@@ -4,6 +4,11 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 
+// Simple rate limiter
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 100; // requests per window
+const RATE_WINDOW = 60000; // 1 minute in ms
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
