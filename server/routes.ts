@@ -18,7 +18,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     // Detect message type and analyze sentiment for user messages
-    let messageType = "general";
+    let messageType: "general" | "code" | "analysis" = "general";
     let metadata = {};
 
     if (parseResult.data.role === "user") {

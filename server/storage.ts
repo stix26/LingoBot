@@ -32,9 +32,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addMessage(insertMessage: InsertMessage): Promise<Message> {
+    const messageToInsert = {
+      content: insertMessage.content,
+      role: insertMessage.role,
+      type: insertMessage.type || "general",
+      metadata: insertMessage.metadata || {}
+    };
+
     const [message] = await db
       .insert(messages)
-      .values(insertMessage)
+      .values(messageToInsert)
       .returning();
     return message;
   }

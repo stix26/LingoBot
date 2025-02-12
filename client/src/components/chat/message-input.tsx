@@ -19,7 +19,8 @@ export default function MessageInput({
   const [settings, setSettings] = useState<ChatSettings>({
     model: "gpt-4o",
     temperature: 1,
-    systemPrompt: "You are a helpful AI assistant. Provide clear, accurate, and engaging responses. Feel free to use markdown for better formatting."
+    systemPrompt: "You are a helpful AI assistant. Provide clear, accurate, and engaging responses. Feel free to use markdown for better formatting.",
+    mode: "general"
   });
 
   const handleSubmit = () => {
