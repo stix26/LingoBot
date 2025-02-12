@@ -74,6 +74,10 @@ export function registerRoutes(app: express.Express) {
         res.status(400).json({ error: fromZodError(error).message });
       } else {
         console.error("Error creating message:", error);
+        await storage.createMessage({
+          content: "Sorry, I encountered an error processing your message.",
+          metadata: { sentiment: 3, role: "assistant" }
+        });
         res.status(500).json({ error: "Failed to create message" });
       }
     }

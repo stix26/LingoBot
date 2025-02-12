@@ -31,17 +31,17 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.REPL_ID!,
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
       secure: app.get("env") === "production",
       httpOnly: true,
-      maxAge: 1 * 60 * 60 * 1000, // 1 hour
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax'
     },
-    name: 'sess', // Change session cookie name
-    rolling: true, // Refresh session with each request
+    name: 'sess',
+    rolling: true,
   };
 
   if (app.get("env") === "production") {
@@ -128,25 +128,16 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    // Clear any existing session
-    req.logout((err) => {
+    passport.authenticate("local", (err, user, info) => {
       if (err) return next(err);
-
-      passport.authenticate("local", (err, user, info) => {
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
+      req.login(user, (err) => {
         if (err) return next(err);
-        if (!user) {
-          return res.status(401).json({ message: info?.message || "Authentication failed" });
-        }
-        req.login(user, (err) => {
-          if (err) return next(err);
-          // Set a new session
-          req.session.regenerate((err) => {
-            if (err) return next(err);
-            res.status(200).json(user);
-          });
-        });
-      })(req, res, next);
-    });
+        res.status(200).json(user);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
