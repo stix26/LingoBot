@@ -19,10 +19,10 @@ if (missingVars.length > 0) {
 }
 
 // Rate limiting configuration with proper type casting
-const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 100; // requests per window
+const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 20; // Reduced to 20 requests per window
 const RATE_WINDOW = Number(process.env.RATE_WINDOW) || 60000; // 1 minute in ms
 
-// Simple rate limiter with proper typing
+// Enhanced rate limiter with proper typing
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
 const app = express();
@@ -39,13 +39,17 @@ app.use(express.urlencoded({ extended: false }));
   }
 })();
 
-// Enhanced rate limiting middleware with better IP handling
+// Enhanced rate limiting middleware with better IP handling and error messages
 app.use((req, res, next) => {
-  // Get IP from X-Forwarded-For header if behind a proxy, fallback to direct IP
+  // Skip rate limiting for static assets and non-API routes
+  if (!req.path.startsWith('/api/')) {
+    return next();
+  }
+
   const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
-             req.ip || 
-             req.socket.remoteAddress || 
-             'unknown';
+           req.ip || 
+           req.socket.remoteAddress || 
+           'unknown';
 
   const now = Date.now();
   const requestData = requestCounts.get(ip) || { count: 0, resetTime: now + RATE_WINDOW };
@@ -54,9 +58,11 @@ app.use((req, res, next) => {
     requestData.count = 1;
     requestData.resetTime = now + RATE_WINDOW;
   } else if (requestData.count >= RATE_LIMIT) {
+    const retryAfter = Math.ceil((requestData.resetTime - now) / 1000);
     return res.status(429).json({ 
       error: "Too many requests", 
-      retryAfter: Math.ceil((requestData.resetTime - now) / 1000)
+      message: `Please try again in ${retryAfter} seconds`,
+      retryAfter
     });
   } else {
     requestData.count++;
