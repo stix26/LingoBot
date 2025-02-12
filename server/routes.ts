@@ -5,12 +5,21 @@ import { generateChatResponse, analyzeMessageSentiment, detectMessageType } from
 import { insertMessageSchema, chatSettingsSchema } from "@shared/schema";
 
 export function registerRoutes(app: Express): Server {
-  app.get("/api/messages", async (_req, res) => {
+  // Authentication middleware for protected routes
+  const requireAuth = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    next();
+  };
+
+  // Protected routes
+  app.get("/api/messages", requireAuth, async (_req, res) => {
     const messages = await storage.getMessages();
     res.json(messages);
   });
 
-  app.post("/api/messages", async (req, res) => {
+  app.post("/api/messages", requireAuth, async (req, res) => {
     console.log('Received message request:', req.body);
     const parseResult = insertMessageSchema.safeParse(req.body);
     if (!parseResult.success) {
@@ -37,7 +46,8 @@ export function registerRoutes(app: Express): Server {
     const message = await storage.addMessage({
       ...parseResult.data,
       type: messageType,
-      metadata
+      metadata,
+      userId: req.user?.id // Associate message with current user
     });
 
     if (message.role === "user") {
@@ -63,7 +73,8 @@ export function registerRoutes(app: Express): Server {
           content: aiResponse,
           role: "assistant",
           type: messageType,
-          metadata: { context: "Response to user query" }
+          metadata: { context: "Response to user query" },
+          userId: req.user?.id
         });
 
         res.json({ userMessage: message, aiMessage });
@@ -75,7 +86,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/messages/clear", async (_req, res) => {
+  app.post("/api/messages/clear", requireAuth, async (_req, res) => {
     await storage.clearMessages();
     res.json({ message: "Chat history cleared" });
   });

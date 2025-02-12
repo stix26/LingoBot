@@ -32,7 +32,8 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
   content: true,
   role: true,
   type: true,
-  metadata: true
+  metadata: true,
+  userId: true
 });
 
 export type Message = typeof messages.$inferSelect;
