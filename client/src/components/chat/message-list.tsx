@@ -45,8 +45,8 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
                 "h-10 w-10 ring-2 ring-background shadow-xl", 
                 { 
                   "order-2": isUser,
-                  "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/20": isUser,
-                  "bg-gradient-to-br from-teal-400 to-emerald-600 text-white shadow-emerald-500/20": !isUser
+                  "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20": isUser,
+                  "bg-gradient-to-br from-purple-500 to-blue-600 text-white shadow-lg shadow-blue-500/20": !isUser
                 }
               )}
             >
@@ -60,8 +60,8 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
               className={cn(
                 "p-4 max-w-[85%] sm:max-w-[75%] shadow-lg transition-colors backdrop-blur-sm", 
                 {
-                  "bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-tr-none shadow-xl shadow-green-500/20": isUser,
-                  "bg-white dark:bg-gray-900 border-2 border-green-500/20 dark:border-green-500/20 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl shadow-emerald-500/10 rounded-tl-none": !isUser
+                  "bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-tr-none shadow-xl shadow-green-500/20": isUser,
+                  "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium border-2 border-blue-500/20 dark:border-blue-400/20 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-sm max-w-none shadow-xl shadow-blue-500/10 rounded-tl-none dark:prose-invert": !isUser
                 }
               )}
             >
