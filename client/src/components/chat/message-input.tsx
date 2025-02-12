@@ -9,11 +9,13 @@ import { motion, AnimatePresence } from "framer-motion";
 interface MessageInputProps {
   onSendMessage: (content: string, settings: ChatSettings) => void;
   isLoading: boolean;
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
 export default function MessageInput({
   onSendMessage,
   isLoading,
+  onTypingChange
 }: MessageInputProps) {
   const [content, setContent] = useState("");
   const [settings, setSettings] = useState<ChatSettings>({
@@ -27,6 +29,7 @@ export default function MessageInput({
     if (content.trim() && !isLoading) {
       onSendMessage(content.trim(), settings);
       setContent("");
+      onTypingChange?.(false);
     }
   };
 
@@ -37,6 +40,11 @@ export default function MessageInput({
     }
   };
 
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    onTypingChange?.(e.target.value.length > 0);
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background to-background/80 backdrop-blur-sm pb-6 pt-4 px-4">
       <div className="max-w-4xl mx-auto">
@@ -44,7 +52,7 @@ export default function MessageInput({
           <div className="flex-1 relative">
             <Textarea
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={handleContentChange}
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
               className="resize-none pr-12 min-h-[100px] rounded-xl shadow-lg border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-violet-500/20"
