@@ -22,10 +22,9 @@ import {
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { Redirect } from "wouter";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuthPage() {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, loginMutation, registerMutation, isLoading } = useAuth();
 
   const form = useForm({
     resolver: zodResolver(insertUserSchema.extend({
@@ -39,9 +38,13 @@ export default function AuthPage() {
   });
 
   if (isLoading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
-  
+
   if (user) {
     return <Redirect to="/" />;
   }

@@ -6,6 +6,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { avatarCustomizationSchema, type AvatarCustomization } from "@shared/schema";
+import { Circle, Hexagon, Square, Paintbrush } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -14,12 +20,6 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { avatarCustomizationSchema, type AvatarCustomization } from "@shared/schema";
-import { Circle, Hexagon, Square, Paintbrush } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface AvatarCustomizerProps {
   settings: AvatarCustomization;
@@ -47,10 +47,6 @@ export default function AvatarCustomizer({
     values: settings
   });
 
-  React.useEffect(() => {
-    form.reset(settings);
-  }, [settings, form]);
-
   const onSubmit = (data: AvatarCustomization) => {
     onSettingsChange(data);
     setOpen(false);
@@ -72,10 +68,7 @@ export default function AvatarCustomizer({
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 pt-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
             <FormField
               control={form.control}
               name="shape"
@@ -85,7 +78,7 @@ export default function AvatarCustomizer({
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="flex gap-4"
                     >
                       {[
@@ -93,24 +86,25 @@ export default function AvatarCustomizer({
                         { value: "squircle", icon: Square },
                         { value: "hexagon", icon: Hexagon },
                       ].map(({ value, icon: Icon }) => (
-                        <FormItem key={value} className="flex items-center space-x-2">
+                        <FormItem key={value}>
                           <FormControl>
-                            <RadioGroupItem value={value} className="peer sr-only" />
+                            <RadioGroupItem value={value} className="sr-only" />
                           </FormControl>
-                          <div className={cn(
-                            "p-3 rounded-lg border-2 hover:border-accent cursor-pointer",
-                            "transition-all duration-200 ease-in-out transform hover:scale-105",
-                            "hover:bg-accent/5",
-                            "data-[state=checked]:border-primary data-[state=checked]:bg-primary/5",
-                            "data-[state=checked]:ring-2 data-[state=checked]:ring-primary/20",
-                            "data-[state=checked]:scale-110",
-                            "peer-checked:border-primary peer-checked:bg-primary/5",
-                            "peer-checked:ring-2 peer-checked:ring-primary/20",
-                            "peer-checked:scale-110",
-                            field.value === value ? "border-primary bg-primary/5 ring-2 ring-primary/20 scale-110" : ""
-                          )}>
+                          <label
+                            htmlFor={value}
+                            className={cn(
+                              "flex items-center justify-center p-3 rounded-lg border-2 cursor-pointer",
+                              "transition-all duration-200 ease-in-out",
+                              "hover:border-accent hover:bg-accent/5 hover:scale-105",
+                              field.value === value ? [
+                                "border-primary bg-primary/5",
+                                "ring-2 ring-primary/20",
+                                "scale-110 shadow-lg"
+                              ] : "border-muted"
+                            )}
+                          >
                             <Icon className="h-6 w-6" />
-                          </div>
+                          </label>
                         </FormItem>
                       ))}
                     </RadioGroup>
@@ -128,32 +122,31 @@ export default function AvatarCustomizer({
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="grid grid-cols-3 gap-4"
                     >
                       {["minimal", "cute", "robot"].map((style) => (
                         <FormItem key={style}>
                           <FormControl>
-                            <RadioGroupItem
-                              value={style}
-                              className="peer sr-only"
-                            />
+                            <RadioGroupItem value={style} className="sr-only" />
                           </FormControl>
-                          <div className={cn(
-                            "rounded-lg border-2 border-muted p-4",
-                            "text-center cursor-pointer transition-all duration-200",
-                            "hover:border-accent hover:bg-accent/5",
-                            "hover:shadow-lg hover:scale-105",
-                            "data-[state=checked]:border-primary data-[state=checked]:bg-primary/5",
-                            "data-[state=checked]:ring-2 data-[state=checked]:ring-primary/20",
-                            "data-[state=checked]:scale-110",
-                            "peer-checked:border-primary peer-checked:bg-primary/5",
-                            "peer-checked:ring-2 peer-checked:ring-primary/20",
-                            "peer-checked:scale-110",
-                            field.value === style ? "border-primary bg-primary/5 ring-2 ring-primary/20 scale-110" : ""
-                          )}>
-                            {style.charAt(0).toUpperCase() + style.slice(1)}
-                          </div>
+                          <label
+                            htmlFor={style}
+                            className={cn(
+                              "block p-4 rounded-lg border-2 cursor-pointer",
+                              "transition-all duration-200 ease-in-out",
+                              "hover:border-accent hover:bg-accent/5 hover:scale-105",
+                              field.value === style ? [
+                                "border-primary bg-primary/5",
+                                "ring-2 ring-primary/20",
+                                "scale-110 shadow-lg"
+                              ] : "border-muted"
+                            )}
+                          >
+                            <span className="block text-center">
+                              {style.charAt(0).toUpperCase() + style.slice(1)}
+                            </span>
+                          </label>
                         </FormItem>
                       ))}
                     </RadioGroup>
@@ -171,32 +164,31 @@ export default function AvatarCustomizer({
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="grid grid-cols-3 gap-4"
                     >
                       {["bounce", "pulse", "wave"].map((animation) => (
                         <FormItem key={animation}>
                           <FormControl>
-                            <RadioGroupItem
-                              value={animation}
-                              className="peer sr-only"
-                            />
+                            <RadioGroupItem value={animation} className="sr-only" />
                           </FormControl>
-                          <div className={cn(
-                            "rounded-lg border-2 border-muted p-4",
-                            "text-center cursor-pointer transition-all duration-200",
-                            "hover:border-accent hover:bg-accent/5",
-                            "hover:shadow-lg hover:scale-105",
-                            "data-[state=checked]:border-primary data-[state=checked]:bg-primary/5",
-                            "data-[state=checked]:ring-2 data-[state=checked]:ring-primary/20",
-                            "data-[state=checked]:scale-110",
-                            "peer-checked:border-primary peer-checked:bg-primary/5",
-                            "peer-checked:ring-2 peer-checked:ring-primary/20",
-                            "peer-checked:scale-110",
-                            field.value === animation ? "border-primary bg-primary/5 ring-2 ring-primary/20 scale-110" : ""
-                          )}>
-                            {animation.charAt(0).toUpperCase() + animation.slice(1)}
-                          </div>
+                          <label
+                            htmlFor={animation}
+                            className={cn(
+                              "block p-4 rounded-lg border-2 cursor-pointer",
+                              "transition-all duration-200 ease-in-out",
+                              "hover:border-accent hover:bg-accent/5 hover:scale-105",
+                              field.value === animation ? [
+                                "border-primary bg-primary/5",
+                                "ring-2 ring-primary/20",
+                                "scale-110 shadow-lg"
+                              ] : "border-muted"
+                            )}
+                          >
+                            <span className="block text-center">
+                              {animation.charAt(0).toUpperCase() + animation.slice(1)}
+                            </span>
+                          </label>
                         </FormItem>
                       ))}
                     </RadioGroup>
