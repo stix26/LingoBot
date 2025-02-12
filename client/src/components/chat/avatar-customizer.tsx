@@ -101,7 +101,8 @@ export default function AvatarCustomizer({
                             "data-[state=checked]:scale-110",
                             "peer-checked:border-primary peer-checked:bg-primary/5",
                             "peer-checked:ring-2 peer-checked:ring-primary/20",
-                            "peer-checked:scale-110"
+                            "peer-checked:scale-110",
+                            field.value === value ? "border-primary bg-primary/5 ring-2 ring-primary/20 scale-110" : ""
                           )}>
                             <Icon className="h-6 w-6" />
                           </div>
@@ -143,7 +144,8 @@ export default function AvatarCustomizer({
                             "data-[state=checked]:scale-110",
                             "peer-checked:border-primary peer-checked:bg-primary/5",
                             "peer-checked:ring-2 peer-checked:ring-primary/20",
-                            "peer-checked:scale-110"
+                            "peer-checked:scale-110",
+                            field.value === style ? "border-primary bg-primary/5 ring-2 ring-primary/20 scale-110" : ""
                           )}>
                             {style.charAt(0).toUpperCase() + style.slice(1)}
                           </div>
@@ -185,7 +187,8 @@ export default function AvatarCustomizer({
                             "data-[state=checked]:scale-110",
                             "peer-checked:border-primary peer-checked:bg-primary/5",
                             "peer-checked:ring-2 peer-checked:ring-primary/20",
-                            "peer-checked:scale-110"
+                            "peer-checked:scale-110",
+                            field.value === animation ? "border-primary bg-primary/5 ring-2 ring-primary/20 scale-110" : ""
                           )}>
                             {animation.charAt(0).toUpperCase() + animation.slice(1)}
                           </div>
