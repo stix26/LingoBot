@@ -1,7 +1,7 @@
 import express from "express";
 import { insertMessageSchema, type Message, chatSettings } from "@shared/schema";
 import { storage } from "./storage";
-import { analyzeSentiment, generateChatResponse } from "./lib/openai";
+import { analyzeSentiment, generateChatResponse, generateSuggestions } from "./lib/openai";
 import { setupAuth } from "./auth";
 import { createServer } from "http";
 import { ZodError } from "zod";
@@ -82,6 +82,22 @@ export function registerRoutes(app: express.Express) {
   app.post("/api/messages/clear", requireAuth, async (req, res) => {
     await storage.clearMessages();
     res.sendStatus(200);
+  });
+
+  app.get("/api/suggestions", requireAuth, async (req, res) => {
+    try {
+      const messages = await storage.getMessages();
+      const messageHistory = messages.map(msg => ({
+        role: msg.metadata.role as "user" | "assistant" | "system",
+        content: msg.content
+      }));
+
+      const suggestions = await generateSuggestions(messageHistory);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error generating suggestions:", error);
+      res.status(500).json({ error: "Failed to generate suggestions" });
+    }
   });
 
   const httpServer = createServer(app);
