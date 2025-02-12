@@ -1,12 +1,17 @@
 import OpenAI from "openai";
 import { type ChatSettings } from "@shared/schema";
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable is required");
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+  throw new Error(
+    "OPENAI_API_KEY environment variable is missing. Please add it to your .env file.\n" +
+    "Get your API key from https://platform.openai.com/account/api-keys"
+  );
 }
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const MODE_PROMPTS = {
   general: "You are a helpful AI assistant. Provide clear, accurate, and engaging responses. Feel free to use markdown for better formatting.",
