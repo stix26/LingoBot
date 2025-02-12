@@ -45,16 +45,16 @@ export default function MessageInput({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background to-background/80 backdrop-blur-sm pb-6 pt-4 px-4">
+    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background to-background/80 backdrop-blur-sm pb-6 pt-4 px-2 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <div className="flex-1 relative">
             <Textarea
               value={content}
               onChange={handleContentChange}
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
-              className="resize-none pr-12 min-h-[100px] rounded-xl shadow-lg border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-violet-500/20"
+              className="resize-none pr-12 min-h-[80px] sm:min-h-[100px] rounded-xl shadow-lg border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-green-500/20"
               disabled={isLoading}
             />
             <AnimatePresence>
@@ -65,7 +65,7 @@ export default function MessageInput({
                   exit={{ opacity: 0 }}
                   className="absolute right-3 bottom-3"
                 >
-                  <Loader2 className="h-5 w-5 animate-spin text-violet-500" />
+                  <Loader2 className="h-5 w-5 animate-spin text-green-500" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -75,9 +75,9 @@ export default function MessageInput({
               onClick={handleSubmit}
               disabled={!content.trim() || isLoading}
               size="icon"
-              className="h-12 w-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg"
             >
-              <Send className="h-5 w-5" />
+              <Send className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             <SettingsDialog 
               settings={settings} 
@@ -86,9 +86,9 @@ export default function MessageInput({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-xl hover:bg-green-500/10 hover:text-green-500 transition-colors"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl hover:bg-green-500/10 hover:text-green-500 transition-colors"
               >
-                <Settings2 className="h-5 w-5" />
+                <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </SettingsDialog>
           </div>

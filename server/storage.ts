@@ -47,7 +47,7 @@ export class MemStorage implements IStorage {
     const message: Message = {
       id: this.nextMessageId++,
       content: insertMessage.content,
-      metadata: insertMessage.metadata || {},
+      metadata: insertMessage.metadata || { role: "user", sentiment: 0 },
       createdAt: new Date(),
     };
     this.messages.push(message);

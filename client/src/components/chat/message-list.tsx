@@ -15,7 +15,7 @@ interface MessageListProps {
 export default function MessageList({ messages, isLoading }: MessageListProps) {
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 px-2 sm:px-0">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex items-start gap-3">
             <Skeleton className="h-10 w-10 rounded-full" />
@@ -27,7 +27,7 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-6 pb-4 max-w-4xl mx-auto">
+    <div className="space-y-6 pb-4 max-w-4xl mx-auto px-2 sm:px-4">
       {messages.map((message, index) => (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -43,8 +43,8 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
               "h-10 w-10 ring-2 ring-background shadow-xl", 
               { 
                 "order-2": message.role === "user",
-                "bg-gradient-to-br from-blue-500 to-violet-600 text-white": message.role === "user",
-                "bg-gradient-to-br from-rose-400 to-pink-600 text-white": message.role === "assistant"
+                "bg-gradient-to-br from-green-500 to-emerald-600 text-white": message.role === "user",
+                "bg-gradient-to-br from-teal-400 to-emerald-600 text-white": message.role === "assistant"
               }
             )}
           >
@@ -56,9 +56,9 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
           </Avatar>
           <Card 
             className={cn(
-              "p-4 max-w-[85%] shadow-lg transition-colors backdrop-blur-sm", 
+              "p-4 max-w-[85%] sm:max-w-[75%] shadow-lg transition-colors backdrop-blur-sm", 
               {
-                "bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-tr-none": message.role === "user",
+                "bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-tr-none": message.role === "user",
                 "bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl rounded-tl-none": message.role === "assistant"
               }
             )}
