@@ -18,22 +18,29 @@ interface ChatHeaderProps {
 
 export default function ChatHeader({ onClearChat }: ChatHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-          <Bot className="h-5 w-5 text-primary" />
+    <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-gray-50/90 to-white/90 dark:from-gray-900/90 dark:to-gray-800/90 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ring-2 ring-purple-500/20">
+          <Bot className="h-6 w-6 text-white" />
         </div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-          AI Chat Assistant
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+            AI Chat Assistant
+          </h1>
+          <p className="text-sm text-muted-foreground">Ask me anything!</p>
+        </div>
       </div>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button 
+            variant="outline" 
+            size="icon"
+            className="rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors"
+          >
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Clear chat history?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -41,10 +48,10 @@ export default function ChatHeader({ onClearChat }: ChatHeaderProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={onClearChat}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg"
             >
               Clear History
             </AlertDialogAction>

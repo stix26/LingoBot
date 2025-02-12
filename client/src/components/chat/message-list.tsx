@@ -27,12 +27,12 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-6 pb-4">
+    <div className="space-y-6 pb-4 max-w-4xl mx-auto">
       {messages.map((message, index) => (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
+          transition={{ duration: 0.4, delay: index * 0.1 }}
           key={message.id}
           className={cn("flex items-start gap-4", {
             "justify-end": message.role === "user",
@@ -40,11 +40,11 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
         >
           <Avatar 
             className={cn(
-              "h-10 w-10 ring-2 ring-background shadow-md", 
+              "h-10 w-10 ring-2 ring-background shadow-xl", 
               { 
                 "order-2": message.role === "user",
-                "bg-gradient-to-br from-violet-600 to-indigo-600 text-white": message.role === "user",
-                "bg-gradient-to-br from-pink-500 to-rose-500 text-white": message.role === "assistant"
+                "bg-gradient-to-br from-blue-500 to-violet-600 text-white": message.role === "user",
+                "bg-gradient-to-br from-rose-400 to-pink-600 text-white": message.role === "assistant"
               }
             )}
           >
@@ -56,15 +56,15 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
           </Avatar>
           <Card 
             className={cn(
-              "p-4 max-w-[80%] shadow-lg transition-colors", 
+              "p-4 max-w-[85%] shadow-lg transition-colors backdrop-blur-sm", 
               {
-                "bg-gradient-to-r from-violet-600 to-indigo-600 text-white": message.role === "user",
-                "bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl": message.role === "assistant"
+                "bg-gradient-to-r from-blue-500 to-violet-600 text-white rounded-tr-none": message.role === "user",
+                "bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl rounded-tl-none": message.role === "assistant"
               }
             )}
           >
             {message.role === "assistant" ? (
-              <ReactMarkdown className="text-sm whitespace-pre-wrap">
+              <ReactMarkdown className="text-sm whitespace-pre-wrap prose prose-slate dark:prose-invert">
                 {message.content}
               </ReactMarkdown>
             ) : (

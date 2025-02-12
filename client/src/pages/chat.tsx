@@ -50,22 +50,20 @@ export default function Chat() {
   });
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       <ChatHeader onClearChat={() => clearChatMutation.mutate()} />
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 px-4 pb-32">
         <MessageList
           messages={messagesQuery.data || []}
           isLoading={messagesQuery.isLoading}
         />
       </ScrollArea>
-      <div className="p-4 border-t">
-        <MessageInput
-          onSendMessage={(content, settings) =>
-            sendMessageMutation.mutate({ content, settings })
-          }
-          isLoading={sendMessageMutation.isPending}
-        />
-      </div>
+      <MessageInput
+        onSendMessage={(content, settings) =>
+          sendMessageMutation.mutate({ content, settings })
+        }
+        isLoading={sendMessageMutation.isPending}
+      />
     </div>
   );
 }
