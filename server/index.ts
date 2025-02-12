@@ -74,18 +74,38 @@ setupAuth(app);
     serveStatic(app);
   }
 
-  const startServer = (port: number) => {
-    try {
-      server.listen(port, "0.0.0.0", () => {
-        log(`serving on port ${port}`);
-      });
-    } catch (err) {
-      if (err.code === 'EADDRINUSE') {
-        log(`Port ${port} in use, trying ${port + 1}`);
-        startServer(port + 1);
-      } else {
-        throw err;
+  const startServer = async (initialPort: number) => {
+    const findAvailablePort = async (port: number): Promise<number> => {
+      try {
+        await new Promise((resolve, reject) => {
+          server.once('error', (err: any) => {
+            if (err.code === 'EADDRINUSE') {
+              server.close();
+              resolve(findAvailablePort(port + 1));
+            } else {
+              reject(err);
+            }
+          });
+          server.listen(port, "0.0.0.0", () => {
+            server.removeAllListeners('error');
+            resolve(port);
+          });
+        });
+        return port;
+      } catch (err) {
+        if (port > initialPort + 10) {
+          throw new Error('No available ports found');
+        }
+        return findAvailablePort(port + 1);
       }
+    };
+
+    try {
+      const port = await findAvailablePort(initialPort);
+      log(`serving on port ${port}`);
+    } catch (err) {
+      console.error('Failed to start server:', err);
+      process.exit(1);
     }
   };
 

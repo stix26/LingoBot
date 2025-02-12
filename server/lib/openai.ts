@@ -62,7 +62,6 @@ export async function generateChatResponse(
   settings: ChatSettings
 ): Promise<string> {
   try {
-    // Enhance system prompt based on mode
     const modePrompt = MODE_PROMPTS[settings.mode] || MODE_PROMPTS.general;
     const enhancedMessages = [
       { role: "system" as const, content: `${modePrompt}\n\n${settings.systemPrompt}` },
@@ -73,12 +72,20 @@ export async function generateChatResponse(
       model: "gpt-4o",
       messages: enhancedMessages,
       temperature: settings.temperature,
+      max_tokens: 2000,
+      timeout: 30000,
     });
 
     return response.choices[0].message.content || "I couldn't generate a response.";
-  } catch (error) {
+  } catch (error: any) {
     console.error("OpenAI API error:", error);
-    throw new Error("Failed to generate response");
+    if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET') {
+      return "I'm having trouble connecting to my brain. Please try again.";
+    }
+    if (error.response?.status === 429) {
+      return "I'm a bit overwhelmed right now. Please try again in a moment.";
+    }
+    return "I encountered an error while processing your request. Please try again.";
   }
 }
 
