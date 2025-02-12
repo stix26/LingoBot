@@ -24,7 +24,7 @@ export default function Chat() {
 
   const suggestionsQuery = useQuery<string[]>({
     queryKey: ["/api/suggestions"],
-    enabled: !!messagesQuery.data?.length, // Only fetch suggestions if there are messages
+    enabled: !!messagesQuery.data?.length,
   });
 
   const updateAvatarMutation = useMutation({
@@ -76,7 +76,6 @@ export default function Chat() {
     },
   });
 
-  // Get the latest message sentiment
   const latestMessage = messagesQuery.data?.[messagesQuery.data?.length - 1];
   const sentiment = latestMessage?.metadata?.sentiment;
 
@@ -105,24 +104,33 @@ export default function Chat() {
           />
         </div>
       </ChatHeader>
-      <ScrollArea className="flex-1 px-4 pb-32">
-        <MessageList
-          messages={messagesQuery.data || []}
-          isLoading={messagesQuery.isLoading}
-        />
-        <div className="mt-4">
-          <SuggestionChips
-            suggestions={suggestionsQuery.data || []}
-            onSelect={handleSuggestionSelect}
-            isLoading={suggestionsQuery.isLoading}
+
+      <div className="flex-1 relative">
+        <ScrollArea className="h-[calc(100vh-180px)] px-4">
+          <MessageList
+            messages={messagesQuery.data || []}
+            isLoading={messagesQuery.isLoading}
           />
+        </ScrollArea>
+
+        {/* Fixed suggestion chips above input */}
+        <div className="absolute bottom-24 left-0 right-0 px-4 z-20">
+          <div className="max-w-4xl mx-auto">
+            <SuggestionChips
+              suggestions={suggestionsQuery.data || []}
+              onSelect={handleSuggestionSelect}
+              isLoading={suggestionsQuery.isLoading}
+            />
+          </div>
         </div>
-      </ScrollArea>
+      </div>
+
       <MessageInput
         onSendMessage={(content, settings) => sendMessageMutation.mutate({ content, settings })}
         isLoading={sendMessageMutation.isPending}
         onTypingChange={setIsTyping}
       />
+
       <Mascot
         sentiment={sentiment ? { score: sentiment, confidence: 1 } : undefined}
         isTyping={isTyping}
