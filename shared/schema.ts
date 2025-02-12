@@ -18,7 +18,7 @@ export const users = pgTable("users", {
 export const messages = pgTable("messages", {
   id: integer("id").primaryKey().default(sql`gen_random_uuid()`),
   content: text("content").notNull(),
-  metadata: jsonb("metadata").$type<z.infer<typeof messageMetadataSchema>>().default({}).notNull(),
+  metadata: jsonb("metadata").$type<z.infer<typeof messageMetadataSchema>>().notNull().default({ role: "user" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -32,7 +32,6 @@ export const insertMessageSchema = createInsertSchema(messages, {
   metadata: messageMetadataSchema
 });
 
-// Define and export both chatSettings and chatSettingsSchema for compatibility
 export const chatSettings = z.object({
   temperature: z.number().min(0).max(2),
   systemPrompt: z.string().optional(),

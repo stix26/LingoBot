@@ -61,7 +61,7 @@ export default function Chat() {
 
   // Get the latest message sentiment
   const latestMessage = messagesQuery.data?.[messagesQuery.data?.length - 1];
-  const latestSentiment = latestMessage?.metadata as { sentiment?: number };
+  const sentiment = latestMessage?.metadata?.sentiment;
 
   const handleSuggestionSelect = (suggestion: string) => {
     const defaultSettings: ChatSettings = {
@@ -94,7 +94,7 @@ export default function Chat() {
         onTypingChange={setIsTyping}
       />
       <Mascot
-        sentiment={latestSentiment}
+        sentiment={sentiment ? { score: sentiment, confidence: 1 } : undefined}
         isTyping={isTyping}
         isThinking={sendMessageMutation.isPending}
       />

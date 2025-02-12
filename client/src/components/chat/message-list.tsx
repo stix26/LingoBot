@@ -28,51 +28,54 @@ export default function MessageList({ messages, isLoading }: MessageListProps) {
 
   return (
     <div className="space-y-6 pb-4 max-w-4xl mx-auto px-2 sm:px-4">
-      {messages.map((message, index) => (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: index * 0.1 }}
-          key={message.id}
-          className={cn("flex items-start gap-4", {
-            "justify-end": message.role === "user",
-          })}
-        >
-          <Avatar 
-            className={cn(
-              "h-10 w-10 ring-2 ring-background shadow-xl", 
-              { 
-                "order-2": message.role === "user",
-                "bg-gradient-to-br from-green-500 to-emerald-600 text-white": message.role === "user",
-                "bg-gradient-to-br from-teal-400 to-emerald-600 text-white": message.role === "assistant"
-              }
-            )}
+      {messages.map((message, index) => {
+        const isUser = message.metadata.role === "user";
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+            key={message.id}
+            className={cn("flex items-start gap-4", {
+              "justify-end": isUser,
+            })}
           >
-            {message.role === "assistant" ? (
-              <Bot className="h-5 w-5" />
-            ) : (
-              <User className="h-5 w-5" />
-            )}
-          </Avatar>
-          <Card 
-            className={cn(
-              "p-4 max-w-[85%] sm:max-w-[75%] shadow-lg transition-colors backdrop-blur-sm", 
-              {
-                "bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-tr-none": message.role === "user",
-                "bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl rounded-tl-none": message.role === "assistant"
-              }
-            )}
-          >
-            {message.role === "assistant" ? (
-              <ReactMarkdown className="text-sm whitespace-pre-wrap prose prose-slate dark:prose-invert">
-                {message.content}
-              </ReactMarkdown>
-            ) : (
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-            )}
-          </Card>
-        </motion.div>
-      ))}
+            <Avatar 
+              className={cn(
+                "h-10 w-10 ring-2 ring-background shadow-xl", 
+                { 
+                  "order-2": isUser,
+                  "bg-gradient-to-br from-green-500 to-emerald-600 text-white": isUser,
+                  "bg-gradient-to-br from-teal-400 to-emerald-600 text-white": !isUser
+                }
+              )}
+            >
+              {message.metadata.role === "assistant" ? (
+                <Bot className="h-5 w-5" />
+              ) : (
+                <User className="h-5 w-5" />
+              )}
+            </Avatar>
+            <Card 
+              className={cn(
+                "p-4 max-w-[85%] sm:max-w-[75%] shadow-lg transition-colors backdrop-blur-sm", 
+                {
+                  "bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-tr-none": isUser,
+                  "bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 prose-pre:bg-gray-800/50 prose-sm dark:prose-invert max-w-none shadow-xl rounded-tl-none": !isUser
+                }
+              )}
+            >
+              {message.metadata.role === "assistant" ? (
+                <ReactMarkdown className="text-sm whitespace-pre-wrap prose prose-slate dark:prose-invert">
+                  {message.content}
+                </ReactMarkdown>
+              ) : (
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              )}
+            </Card>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
