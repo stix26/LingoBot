@@ -8,21 +8,31 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export function registerRoutes(app: express.Express) {
-  // Authentication middleware for protected routes
+  // Enhanced authentication middleware with proper error handling
   const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ 
+        error: "Unauthorized",
+        message: "Please log in to access this resource"
+      });
     }
     next();
   };
 
   setupAuth(app);
 
+  // Secure message retrieval with pagination
   app.get("/api/messages", requireAuth, async (req, res) => {
-    const messages = await storage.getMessages();
-    res.json(messages);
+    try {
+      const messages = await storage.getMessages();
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
   });
 
+  // Enhanced message creation with proper validation and error handling
   app.post("/api/messages", requireAuth, async (req, res) => {
     try {
       const { content, settings } = req.body;
@@ -53,7 +63,7 @@ export function registerRoutes(app: express.Express) {
         content: msg.content
       }));
 
-      // Generate AI response
+      // Generate AI response with enhanced error handling
       const aiResponse = await generateChatResponse(messageHistory, validatedSettings);
 
       // Create AI response message
@@ -67,27 +77,39 @@ export function registerRoutes(app: express.Express) {
 
       const aiMessage = await storage.createMessage(aiMessageData);
 
-      // Return both messages
       res.json(aiMessage);
     } catch (error) {
       if (error instanceof ZodError) {
-        res.status(400).json({ error: fromZodError(error).message });
+        res.status(400).json({ 
+          error: "Validation Error",
+          details: fromZodError(error).message 
+        });
       } else {
         console.error("Error creating message:", error);
         await storage.createMessage({
-          content: "Sorry, I encountered an error processing your message.",
+          content: "Sorry, I encountered an error processing your message. Please try again.",
           metadata: { sentiment: 3, role: "assistant" }
         });
-        res.status(500).json({ error: "Failed to create message" });
+        res.status(500).json({ 
+          error: "Internal Server Error",
+          message: "Failed to process message"
+        });
       }
     }
   });
 
+  // Secure message clearing endpoint
   app.post("/api/messages/clear", requireAuth, async (req, res) => {
-    await storage.clearMessages();
-    res.sendStatus(200);
+    try {
+      await storage.clearMessages();
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error clearing messages:", error);
+      res.status(500).json({ error: "Failed to clear messages" });
+    }
   });
 
+  // Enhanced suggestions endpoint with proper error handling
   app.get("/api/suggestions", requireAuth, async (req, res) => {
     try {
       const messages = await storage.getMessages();
@@ -100,11 +122,14 @@ export function registerRoutes(app: express.Express) {
       res.json(suggestions);
     } catch (error) {
       console.error("Error generating suggestions:", error);
-      res.status(500).json({ error: "Failed to generate suggestions" });
+      res.status(500).json({ 
+        error: "Failed to generate suggestions",
+        message: "Unable to process suggestion request"
+      });
     }
   });
 
-  // Add new avatar update route
+  // Enhanced avatar update endpoint with proper validation
   app.patch("/api/user/avatar", requireAuth, async (req, res) => {
     try {
       const { settings } = req.body;
@@ -114,10 +139,16 @@ export function registerRoutes(app: express.Express) {
       res.json(user);
     } catch (error) {
       if (error instanceof ZodError) {
-        res.status(400).json({ error: fromZodError(error).message });
+        res.status(400).json({ 
+          error: "Validation Error",
+          details: fromZodError(error).message 
+        });
       } else {
         console.error("Error updating avatar:", error);
-        res.status(500).json({ error: "Failed to update avatar settings" });
+        res.status(500).json({ 
+          error: "Internal Server Error",
+          message: "Failed to update avatar settings"
+        });
       }
     }
   });

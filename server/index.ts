@@ -4,10 +4,23 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 
-// Simple rate limiter
+// Environment variables validation
+const requiredEnvVars = ['SESSION_SECRET', 'OPENAI_API_KEY'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  throw new Error(
+    `Missing required environment variables: ${missingVars.join(', ')}.\n` +
+    `Please add them to your .env file. Check .env.example for reference.`
+  );
+}
+
+// Rate limiting configuration with proper type casting
+const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 100; // requests per window
+const RATE_WINDOW = Number(process.env.RATE_WINDOW) || 60000; // 1 minute in ms
+
+// Simple rate limiter with proper typing
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 100; // requests per window
-const RATE_WINDOW = 60000; // 1 minute in ms
 
 const app = express();
 app.use(express.json());
@@ -23,6 +36,34 @@ app.use(express.urlencoded({ extended: false }));
   }
 })();
 
+// Enhanced rate limiting middleware with better IP handling
+app.use((req, res, next) => {
+  // Get IP from X-Forwarded-For header if behind a proxy, fallback to direct IP
+  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
+             req.ip || 
+             req.socket.remoteAddress || 
+             'unknown';
+
+  const now = Date.now();
+  const requestData = requestCounts.get(ip) || { count: 0, resetTime: now + RATE_WINDOW };
+
+  if (now > requestData.resetTime) {
+    requestData.count = 1;
+    requestData.resetTime = now + RATE_WINDOW;
+  } else if (requestData.count >= RATE_LIMIT) {
+    return res.status(429).json({ 
+      error: "Too many requests", 
+      retryAfter: Math.ceil((requestData.resetTime - now) / 1000)
+    });
+  } else {
+    requestData.count++;
+  }
+
+  requestCounts.set(ip, requestData);
+  next();
+});
+
+// Enhanced logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -39,7 +80,11 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        // Safely stringify JSON response, excluding sensitive data
+        const safeResponse = { ...capturedJsonResponse };
+        delete safeResponse.password;
+        delete safeResponse.token;
+        logLine += ` :: ${JSON.stringify(safeResponse)}`;
       }
 
       if (logLine.length > 80) {
@@ -58,19 +103,28 @@ setupAuth(app);
 (async () => {
   const server = registerRoutes(app);
 
+  // Enhanced global error handler with better security
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    // Log error details but exclude sensitive information
     console.error('Error details:', {
       status,
       message,
-      stack: err.stack,
-      timestamp: new Date().toISOString()
+      path: _req.path,
+      method: _req.method,
+      timestamp: new Date().toISOString(),
+      ...(app.get('env') === 'development' ? { stack: err.stack } : {})
     });
 
-    res.status(status).json({ message });
-    throw err;
+    // Don't send stack traces to client in production
+    const errorResponse = {
+      message: status === 500 ? "Internal Server Error" : message,
+      ...(app.get('env') === 'development' ? { stack: err.stack } : {})
+    };
+
+    res.status(status).json(errorResponse);
   });
 
   if (app.get("env") === "development") {
