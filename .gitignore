@@ -14,7 +14,7 @@ vite.config.ts.*
 .env.*
 !.env.example
 
-# Replit specific - remove these files before pushing to GitHub
+# Replit specific
 .replit
 replit.nix
 .config/
@@ -47,3 +47,6 @@ coverage
 *.sqlite
 *.sqlite3
 *.db
+
+# Archives
+*.zip
