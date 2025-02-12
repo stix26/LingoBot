@@ -14,7 +14,7 @@ vite.config.ts.*
 .env.*
 !.env.example
 
-# Replit specific
+# Replit specific - remove these files before pushing to GitHub
 .replit
 replit.nix
 .config/
