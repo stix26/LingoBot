@@ -10,7 +10,7 @@ interface MascotProps {
 
 export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps) {
   const [expression, setExpression] = useState<"happy" | "neutral" | "sad" | "thinking">("neutral");
-  
+
   useEffect(() => {
     if (isThinking) {
       setExpression("thinking");
@@ -27,7 +27,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
 
   return (
     <motion.div 
-      className="fixed bottom-4 right-4 w-24 h-24 pointer-events-none"
+      className="fixed bottom-28 right-4 w-12 h-12 pointer-events-none z-10"
       animate={{
         scale: isTyping ? [1, 1.1, 1] : 1,
         rotate: isThinking ? [0, -5, 5, -5, 0] : 0
@@ -52,7 +52,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
       >
         {/* Base circle */}
         <circle cx="50" cy="50" r="45" fill="currentColor" />
-        
+
         {/* Eyes */}
         {expression === "happy" && (
           <>
@@ -70,14 +70,14 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
             />
           </>
         )}
-        
+
         {expression === "neutral" && (
           <>
             <circle cx="40" cy="45" r="3" fill="white" />
             <circle cx="60" cy="45" r="3" fill="white" />
           </>
         )}
-        
+
         {expression === "sad" && (
           <>
             <path
@@ -94,7 +94,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
             />
           </>
         )}
-        
+
         {expression === "thinking" && (
           <>
             <circle cx="40" cy="45" r="3" fill="white" />
@@ -109,7 +109,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
             </circle>
           </>
         )}
-        
+
         {/* Mouth */}
         {expression === "happy" && (
           <path
@@ -119,7 +119,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
             fill="none"
           />
         )}
-        
+
         {expression === "neutral" && (
           <line
             x1="40"
@@ -130,7 +130,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
             strokeWidth="3"
           />
         )}
-        
+
         {expression === "sad" && (
           <path
             d="M35 70 Q50 60, 65 70"
@@ -139,7 +139,7 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
             fill="none"
           />
         )}
-        
+
         {expression === "thinking" && (
           <path
             d="M40 65 Q50 65, 60 65"
