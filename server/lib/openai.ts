@@ -5,7 +5,7 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY environment variable is required");
 }
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const MODE_PROMPTS = {
@@ -14,24 +14,30 @@ const MODE_PROMPTS = {
   analyst: "You are an analytical assistant. Provide detailed analysis with supporting data when possible. Use markdown tables and lists to organize information. Consider multiple perspectives and provide evidence-based conclusions."
 };
 
-async function analyzeSentiment(text: string): Promise<{ score: number; confidence: number }> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      {
-        role: "system",
-        content: "Analyze the sentiment of the text and return a JSON object with a score (1-5, where 1 is very negative and 5 is very positive) and confidence (0-1)."
-      },
-      { role: "user", content: text }
-    ],
-    response_format: { type: "json_object" }
-  });
+export async function analyzeSentiment(text: string): Promise<number> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a sentiment analysis expert. Analyze the sentiment of the text and provide a rating from -1 (negative) to 1 (positive). Return only the number.",
+        },
+        {
+          role: "user",
+          content: text,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 10,
+    });
 
-  const result = JSON.parse(response.choices[0].message.content || "{}");
-  return {
-    score: Math.max(1, Math.min(5, Math.round(result.score))),
-    confidence: Math.max(0, Math.min(1, result.confidence))
-  };
+    const sentiment = parseFloat(response.choices[0].message.content?.trim() || "0");
+    return Math.max(-1, Math.min(1, sentiment)); // Ensure value is between -1 and 1
+  } catch (error) {
+    console.error("Failed to analyze sentiment:", error);
+    return 0; // Return neutral sentiment on error
+  }
 }
 
 export async function detectMessageType(content: string): Promise<"general" | "code" | "analysis"> {

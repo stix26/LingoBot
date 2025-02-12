@@ -1,6 +1,7 @@
-import { pgTable, text, serial, timestamp, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -10,17 +11,10 @@ export const users = pgTable("users", {
 });
 
 export const messages = pgTable("messages", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey().default(sql`gen_random_uuid()`),
   content: text("content").notNull(),
-  role: text("role", { enum: ["user", "assistant", "system"] }).notNull(),
-  type: text("type", { enum: ["general", "code", "analysis"] }).default("general"),
-  metadata: json("metadata").$type<{
-    sentiment?: { score: number; confidence: number };
-    codeLanguage?: string;
-    context?: string;
-  }>(),
-  userId: integer("user_id").references(() => users.id),
-  timestamp: timestamp("timestamp").defaultNow().notNull()
+  metadata: jsonb("metadata").default({}).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -28,24 +22,25 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true
 });
 
-export const insertMessageSchema = createInsertSchema(messages).pick({
-  content: true,
-  role: true,
-  type: true,
-  metadata: true,
-  userId: true
+export const insertMessageSchema = createInsertSchema(messages, {
+  content: z.string().min(1, "Message cannot be empty"),
+  metadata: z.object({
+    sentiment: z.number(),
+    role: z.enum(["user", "assistant"])
+  })
 });
 
+// Define and export both chatSettings and chatSettingsSchema for compatibility
+export const chatSettings = z.object({
+  temperature: z.number().min(0).max(2),
+  systemPrompt: z.string().optional(),
+  mode: z.enum(["general", "code_assistant", "analyst"]).default("general")
+});
+
+export const chatSettingsSchema = chatSettings;
+
+export type ChatSettings = z.infer<typeof chatSettings>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
-
-export const chatSettingsSchema = z.object({
-  model: z.enum(["gpt-4o"]),
-  temperature: z.number().min(0).max(2),
-  systemPrompt: z.string().min(1),
-  mode: z.enum(["general", "code_assistant", "analyst"]).default("general")
-});
-
-export type ChatSettings = z.infer<typeof chatSettingsSchema>;

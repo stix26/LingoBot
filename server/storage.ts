@@ -1,72 +1,47 @@
-import { type Message, type InsertMessage, messages, users, type User, type InsertUser } from "@shared/schema";
+import { messages, type Message, type InsertMessage } from "@shared/schema";
 import { db } from "./db";
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import session from "express-session";
-import connectPg from "connect-pg-simple";
-import { pool } from "./db";
+import createMemoryStore from "memorystore";
 
-const PostgresSessionStore = connectPg(session);
+const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   getMessages(): Promise<Message[]>;
-  addMessage(message: InsertMessage): Promise<Message>;
+  createMessage(message: InsertMessage): Promise<Message>;
   clearMessages(): Promise<void>;
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
   sessionStore: session.Store;
 }
 
-export class DatabaseStorage implements IStorage {
+export class MemStorage implements IStorage {
+  private messages: Message[] = [];
+  private nextId = 1;
   sessionStore: session.Store;
 
   constructor() {
-    this.sessionStore = new PostgresSessionStore({
-      pool,
-      createTableIfMissing: true,
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000,
     });
   }
 
   async getMessages(): Promise<Message[]> {
-    return await db.select().from(messages).orderBy(asc(messages.timestamp));
+    return this.messages;
   }
 
-  async addMessage(insertMessage: InsertMessage): Promise<Message> {
-    const messageToInsert = {
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const message: Message = {
+      id: this.nextId++,
       content: insertMessage.content,
-      role: insertMessage.role,
-      type: insertMessage.type || "general",
-      metadata: insertMessage.metadata || {}
+      metadata: insertMessage.metadata || {},
+      createdAt: new Date(),
     };
-
-    const [message] = await db
-      .insert(messages)
-      .values(messageToInsert)
-      .returning();
+    this.messages.push(message);
     return message;
   }
 
   async clearMessages(): Promise<void> {
-    await db.delete(messages);
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
+    this.messages = [];
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
