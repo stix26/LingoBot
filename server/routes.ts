@@ -1,7 +1,7 @@
 import express from "express";
 import { insertMessageSchema, type Message, chatSettings } from "@shared/schema";
 import { storage } from "./storage";
-import { analyzeSentiment } from "./lib/openai";
+import { analyzeSentiment, generateChatResponse } from "./lib/openai";
 import { setupAuth } from "./auth";
 import { createServer } from "http";
 import { ZodError } from "zod";
@@ -35,8 +35,8 @@ export function registerRoutes(app: express.Express) {
       // Convert from -1..1 to 1..5 range for the mascot
       const sentiment = ((rawSentiment + 1) * 2) + 1;
 
-      // Create message with metadata
-      const messageData = insertMessageSchema.parse({
+      // Create user message with metadata
+      const userMessageData = insertMessageSchema.parse({
         content,
         metadata: { 
           sentiment,
@@ -44,8 +44,31 @@ export function registerRoutes(app: express.Express) {
         }
       });
 
-      const message = await storage.createMessage(messageData);
-      res.json(message);
+      const userMessage = await storage.createMessage(userMessageData);
+
+      // Get previous messages for context
+      const messages = await storage.getMessages();
+      const messageHistory = messages.map(msg => ({
+        role: msg.metadata.role as "user" | "assistant" | "system",
+        content: msg.content
+      }));
+
+      // Generate AI response
+      const aiResponse = await generateChatResponse(messageHistory, validatedSettings);
+
+      // Create AI response message
+      const aiMessageData = insertMessageSchema.parse({
+        content: aiResponse,
+        metadata: {
+          sentiment: 3, // Neutral sentiment for AI responses
+          role: "assistant"
+        }
+      });
+
+      const aiMessage = await storage.createMessage(aiMessageData);
+
+      // Return both messages
+      res.json(aiMessage);
     } catch (error) {
       if (error instanceof ZodError) {
         res.status(400).json({ error: fromZodError(error).message });
