@@ -44,7 +44,12 @@ export default function AvatarCustomizer({
   const form = useForm<AvatarCustomization>({
     resolver: zodResolver(avatarCustomizationSchema),
     defaultValues: settings,
+    values: settings
   });
+
+  React.useEffect(() => {
+    form.reset(settings);
+  }, [settings, form]);
 
   const onSubmit = (data: AvatarCustomization) => {
     onSettingsChange(data);

@@ -38,6 +38,10 @@ export default function AuthPage() {
     },
   });
 
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+  }
+  
   if (user) {
     return <Redirect to="/" />;
   }

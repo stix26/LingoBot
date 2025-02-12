@@ -33,9 +33,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000 // 30 minutes
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: Infinity,
+    cacheTime: Infinity,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });
 
   // Periodically check authentication status
