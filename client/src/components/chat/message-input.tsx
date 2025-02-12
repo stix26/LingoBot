@@ -75,7 +75,7 @@ export default function MessageInput({
               onClick={handleSubmit}
               disabled={!content.trim() || isLoading}
               size="icon"
-              className="h-12 w-12 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shadow-lg"
+              className="h-12 w-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg"
             >
               <Send className="h-5 w-5" />
             </Button>
@@ -86,7 +86,7 @@ export default function MessageInput({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-xl hover:bg-violet-500/10 hover:text-violet-500 transition-colors"
+                className="h-12 w-12 rounded-xl hover:bg-green-500/10 hover:text-green-500 transition-colors"
               >
                 <Settings2 className="h-5 w-5" />
               </Button>

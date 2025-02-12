@@ -44,10 +44,10 @@ export default function Mascot({ sentiment, isTyping, isThinking }: MascotProps)
         className={cn(
           "w-full h-full filter drop-shadow-lg",
           {
-            "text-violet-500": expression === "neutral",
-            "text-green-500": expression === "happy",
-            "text-blue-500": expression === "sad",
-            "text-yellow-500": expression === "thinking"
+            "text-green-500": expression === "neutral",
+            "text-emerald-500": expression === "happy",
+            "text-teal-500": expression === "sad",
+            "text-lime-500": expression === "thinking"
           }
         )}
       >

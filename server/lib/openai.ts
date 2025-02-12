@@ -73,7 +73,6 @@ export async function generateChatResponse(
       messages: enhancedMessages,
       temperature: settings.temperature,
       max_tokens: 2000,
-      timeout: 30000,
     });
 
     return response.choices[0].message.content || "I couldn't generate a response.";

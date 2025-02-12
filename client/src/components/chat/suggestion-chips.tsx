@@ -50,7 +50,7 @@ export default function SuggestionChips({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-full bg-gradient-to-r from-violet-500/10 to-purple-500/10 hover:from-violet-500/20 hover:to-purple-500/20"
+                  className="rounded-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 hover:from-green-500/20 hover:to-emerald-500/20"
                   onClick={() => onSelect(suggestion)}
                 >
                   {suggestion}

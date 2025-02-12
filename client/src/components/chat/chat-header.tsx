@@ -18,13 +18,13 @@ interface ChatHeaderProps {
 
 export default function ChatHeader({ onClearChat }: ChatHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-gray-50/90 to-white/90 dark:from-gray-900/90 dark:to-gray-800/90 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 shadow-sm">
+    <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-black/90 to-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ring-2 ring-purple-500/20">
+        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg ring-2 ring-green-500/20">
           <Bot className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
             AI Chat Assistant
           </h1>
           <p className="text-sm text-muted-foreground">Ask me anything!</p>

@@ -160,7 +160,7 @@ export default function AuthPage() {
           </TabsContent>
         </Tabs>
       </div>
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-violet-500 to-purple-600 items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-green-500 to-emerald-600 items-center justify-center p-12">
         <div className="max-w-lg text-white">
           <h1 className="text-4xl font-bold mb-4">
             AI Chat Assistant
