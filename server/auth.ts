@@ -29,23 +29,28 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  if (!process.env.SESSION_SECRET) {
+    throw new Error(
+      "SESSION_SECRET environment variable is missing. Please add it to your .env file.\n" +
+      "Generate using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    );
+  }
+
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
-    resave: true,
-    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: false, // Set to false for development
+      secure: app.get("env") === "production",
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       sameSite: 'lax'
-    },
-    name: 'sid'
+    }
   };
 
   if (app.get("env") === "production") {
     app.set("trust proxy", 1);
-    sessionSettings.cookie!.secure = true;
   }
 
   app.use(session(sessionSettings));
@@ -56,25 +61,17 @@ export function setupAuth(app: Express) {
     new LocalStrategy(async (username, password, done) => {
       try {
         const user = await storage.getUserByUsername(username);
-
-        if (!user) {
-          return done(null, false, { message: "Invalid username or password" });
-        }
-
-        const isValid = await comparePasswords(password, user.password);
-
-        if (!isValid) {
+        if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false, { message: "Invalid username or password" });
         }
         return done(null, user);
       } catch (error) {
         return done(error);
       }
-    }),
+    })
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
-
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);

@@ -1,15 +1,24 @@
+# Dependencies
 node_modules
 dist
 .DS_Store
 server/public
-vite.config.ts.*
+
+# Build files
 *.tar.gz
+vite.config.ts.*
 
 # Environment files
 .env
 .env.local
 .env.*
 !.env.example
+
+# Replit specific
+.replit
+replit.nix
+.config/
+.upm/
 
 # Logs
 logs
@@ -33,3 +42,8 @@ Session.vim
 .vercel
 .cache
 coverage
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
