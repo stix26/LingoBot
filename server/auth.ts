@@ -1,7 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
-import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
@@ -36,24 +35,6 @@ export function setupAuth(app: Express) {
     );
   }
 
-  const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: storage.sessionStore,
-    cookie: {
-      secure: app.get("env") === "production",
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: 'lax'
-    }
-  };
-
-  if (app.get("env") === "production") {
-    app.set("trust proxy", 1);
-  }
-
-  app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -124,7 +105,7 @@ export function setupAuth(app: Express) {
       if (err) return next(err);
       req.session.destroy((err) => {
         if (err) return next(err);
-        res.clearCookie('sid').sendStatus(200);
+        res.clearCookie('connect.sid').sendStatus(200);
       });
     });
   });
