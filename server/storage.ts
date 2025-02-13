@@ -27,17 +27,11 @@ export class MemStorage implements IStorage {
   constructor() {
     this.sessionStore = new MemoryStore({
       checkPeriod: 3600000, // 1h
-      stale: true,
+      max: 100, // maximum number of sessions to store
       dispose: (key) => {
-        console.log(`Cleaning up expired session: ${key}`);
+        console.log(`Session expired: ${key}`);
       }
     });
-
-    // Cleanup old messages periodically
-    setInterval(() => {
-      const oneHourAgo = new Date(Date.now() - 3600000);
-      this.messages = this.messages.filter(msg => msg.createdAt > oneHourAgo);
-    }, 3600000);
   }
 
   async getMessages(): Promise<Message[]> {
@@ -48,7 +42,7 @@ export class MemStorage implements IStorage {
     const message: Message = {
       id: this.nextMessageId++,
       content: insertMessage.content,
-      metadata: insertMessage.metadata || { role: "user", sentiment: 0 },
+      metadata: insertMessage.metadata || { role: "user" },
       createdAt: new Date(),
     };
     this.messages.push(message);
