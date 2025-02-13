@@ -1,33 +1,23 @@
-2. Install dependencies:
-```bash
-npm install
-```
+chmod +x ai-chat-assistant-macos
+   ```
 
-3. Set up environment variables:
-```bash
-cp .env.example .env
-```
-Edit `.env` and add your required environment variables:
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
-- `SESSION_SECRET`: A secure random string for session encryption (required)
-  - Generate using: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-- `DATABASE_URL`: PostgreSQL connection string (required)
+#### Linux Users
+1. Download `ai-chat-assistant-linux`
+2. Open terminal and navigate to the download folder
+3. Make the file executable:
+   ```bash
+   chmod +x ai-chat-assistant-linux
+   ```
 
-4. Start the development server:
-```bash
-npm run dev
-```
+### Step 2: Set Up Environment Variables
 
-### Running the Standalone Executable
+Before running the application, you need to set up the required environment variables:
 
-1. Download the appropriate executable for your platform from the releases page:
-   - Windows: `ai-chat-assistant-win.exe`
-   - macOS: `ai-chat-assistant-macos`
-   - Linux: `ai-chat-assistant-linux`
-
-2. Create a `.env` file in the same directory as the executable with the following required environment variables:
+1. Create a file named `.env` in the same folder as the executable
+2. Add the following content to the `.env` file:
    ```env
-   # Required: Your OpenAI API Key from https://platform.openai.com/account/api-keys
+   # Required: Your OpenAI API Key
+   # Get from https://platform.openai.com/account/api-keys
    OPENAI_API_KEY=your_api_key_here
 
    # Required: A secure random string for session encryption
@@ -39,17 +29,50 @@ npm run dev
    DATABASE_URL=your_database_url_here
    ```
 
-3. Run the executable:
-   - Windows: Double-click the `.exe` file or run from command prompt
-   - macOS/Linux: 
-     ```bash
-     chmod +x ./ai-chat-assistant-*
-     ./ai-chat-assistant-*
-     ```
+### Step 3: Running the Application
 
-   If any required environment variables are missing, the application will display an error message with instructions on how to set them up.
+#### Windows:
+- Double-click the `ai-chat-assistant-win.exe` file
+- Or run from Command Prompt:
+  ```cmd
+  ai-chat-assistant-win.exe
+  ```
 
-## Development Guidelines
+#### macOS:
+```bash
+./ai-chat-assistant-macos
+```
+
+#### Linux:
+```bash
+./ai-chat-assistant-linux
+```
+
+### Troubleshooting
+
+1. If you see "Missing environment variables" error:
+   - Make sure the `.env` file is in the same directory as the executable
+   - Verify all required variables are properly set
+
+2. If you get a permission denied error (macOS/Linux):
+   - Run `chmod +x ./ai-chat-assistant-*` to make the file executable
+
+3. For Windows SmartScreen warning:
+   - Click "More info"
+   - Select "Run anyway"
+
+4. Database connection issues:
+   - Verify your DATABASE_URL is correct
+   - Ensure the PostgreSQL server is running
+   - Check if the database exists and is accessible
+
+5. OpenAI API issues:
+   - Verify your OPENAI_API_KEY is valid
+   - Check if you have sufficient API credits
+
+For additional help or to report issues, please visit our support page.
+
+## Development Setup
 
 1. Environment Variables
    - Never commit your `.env` file

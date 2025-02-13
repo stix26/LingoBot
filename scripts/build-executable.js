@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { mkdir } from 'fs/promises';
+import { mkdir, rm } from 'fs/promises';
 import { platform } from 'os';
 
 async function buildExecutable() {
@@ -10,7 +10,9 @@ async function buildExecutable() {
     console.log('Building application...');
     execSync('npm run build', { stdio: 'inherit' });
 
-    // Create executables directory
+    // Clean and recreate executables directory
+    console.log('Preparing executables directory...');
+    await rm('executables', { recursive: true, force: true });
     await mkdir('executables', { recursive: true });
 
     // Platform-specific naming
@@ -20,14 +22,17 @@ async function buildExecutable() {
       linux: '-linux'
     };
 
-    // Use pkg to create executable with explicit entry point and platform-specific naming
-    console.log('Creating executable...');
+    console.log('Creating executables...');
     execSync(
-      `pkg dist/index.js --config pkg.config.json --compress GZip --output executables/ai-chat-assistant${platformExtensions[platform()] || ''}`,
+      `pkg dist/index.js --config pkg.config.json --compress GZip --target node18-win-x64,node18-macos-x64,node18-linux-x64 --output executables/ai-chat-assistant`,
       { stdio: 'inherit' }
     );
 
     console.log('Executable created successfully in executables/ directory');
+    console.log('Please verify the executables at:');
+    console.log('- Windows: executables/ai-chat-assistant.exe');
+    console.log('- macOS:   executables/ai-chat-assistant-macos');
+    console.log('- Linux:   executables/ai-chat-assistant-linux');
   } catch (error) {
     console.error('Error creating executable:', error);
     process.exit(1);
