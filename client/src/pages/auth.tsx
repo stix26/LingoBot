@@ -82,6 +82,7 @@ export default function AuthPage() {
                               {...field} 
                               placeholder="Enter your username"
                               autoComplete="username"
+                              required
                             />
                           </FormControl>
                           <FormMessage />
@@ -100,6 +101,7 @@ export default function AuthPage() {
                               {...field} 
                               placeholder="Enter your password"
                               autoComplete="current-password"
+                              required
                             />
                           </FormControl>
                           <FormMessage />
@@ -148,6 +150,7 @@ export default function AuthPage() {
                               {...field} 
                               placeholder="Choose a username"
                               autoComplete="username"
+                              required
                             />
                           </FormControl>
                           <FormMessage />
@@ -166,6 +169,7 @@ export default function AuthPage() {
                               {...field} 
                               placeholder="Choose a password"
                               autoComplete="new-password"
+                              required
                             />
                           </FormControl>
                           <FormMessage />
