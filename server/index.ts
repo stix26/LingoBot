@@ -8,6 +8,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import session from 'express-session';
 
 // Get the directory name in a cross-platform way
 const __filename = fileURLToPath(import.meta.url);
@@ -40,20 +41,32 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Set trust proxy to work with Replit's proxy
-app.set('trust proxy', 1);
 
-// Clear messages on server start
-(async () => {
-  try {
-    await storage.clearMessages();
-    log("Chat history cleared on server start");
-  } catch (error) {
-    console.error("Failed to clear chat history:", error);
+// Enhanced session configuration
+const sessionSettings: session.SessionOptions = {
+  secret: process.env.SESSION_SECRET!,
+  resave: false,
+  saveUninitialized: false,
+  store: storage.sessionStore,
+  cookie: {
+    secure: app.get("env") === "production",
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    sameSite: 'lax'
   }
-})();
+};
 
-// Enhanced rate limiting middleware with better IP handling and error messages
+if (app.get("env") === "production") {
+  app.set("trust proxy", 1);
+}
+
+app.use(session(sessionSettings));
+
+// Set trust proxy to work with Replit's proxy in development
+if (app.get("env") === "development") {
+  app.set('trust proxy', 1);
+}
+
 app.use((req, res, next) => {
   // Skip rate limiting for static assets and non-API routes
   if (!req.path.startsWith('/api/')) {
