@@ -21,28 +21,17 @@ const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingVars.length > 0) {
   throw new Error(
     `Missing required environment variables: ${missingVars.join(', ')}.\n` +
-    `Please add them to your .env file. Check .env.example for reference.\n\n` +
-    `Required Environment Variables:\n` +
-    `- OPENAI_API_KEY: Get from https://platform.openai.com/account/api-keys\n` +
-    `- SESSION_SECRET: Generate using: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"\n` +
-    `- DATABASE_URL: PostgreSQL connection string (format: postgresql://user:password@host:port/database)\n\n` +
-    `Create a .env file in the same directory as the executable with these variables.`
+    `Please add them to your .env file. Check .env.example for reference.`
   );
 }
 
-// Rate limiting configuration with proper type casting
-const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 20; // Reduced to 20 requests per window
-const RATE_WINDOW = Number(process.env.RATE_WINDOW) || 60000; // 1 minute in ms
-
-// Enhanced rate limiter with proper typing
-const requestCounts = new Map<string, { count: number; resetTime: number }>();
-
 const app = express();
+
+// Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-// Enhanced session configuration
+// Session configuration
 const sessionSettings: session.SessionOptions = {
   secret: process.env.SESSION_SECRET!,
   resave: false,
@@ -62,21 +51,24 @@ if (app.get("env") === "production") {
 
 app.use(session(sessionSettings));
 
-// Set trust proxy to work with Replit's proxy in development
-if (app.get("env") === "development") {
-  app.set('trust proxy', 1);
-}
+// Set up authentication after session
+setupAuth(app);
 
+// Rate limiting configuration
+const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 100;
+const RATE_WINDOW = Number(process.env.RATE_WINDOW) || 60000;
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+
+// Rate limiting middleware
 app.use((req, res, next) => {
-  // Skip rate limiting for static assets and non-API routes
   if (!req.path.startsWith('/api/')) {
     return next();
   }
 
   const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
-           req.ip ||
-           req.socket.remoteAddress ||
-           'unknown';
+    req.ip ||
+    req.socket.remoteAddress ||
+    'unknown';
 
   const now = Date.now();
   const requestData = requestCounts.get(ip) || { count: 0, resetTime: now + RATE_WINDOW };
@@ -85,11 +77,9 @@ app.use((req, res, next) => {
     requestData.count = 1;
     requestData.resetTime = now + RATE_WINDOW;
   } else if (requestData.count >= RATE_LIMIT) {
-    const retryAfter = Math.ceil((requestData.resetTime - now) / 1000);
     return res.status(429).json({
       error: "Too many requests",
-      message: `Please try again in ${retryAfter} seconds`,
-      retryAfter
+      message: `Please try again in ${Math.ceil((requestData.resetTime - now) / 1000)} seconds`,
     });
   } else {
     requestData.count++;
@@ -99,117 +89,32 @@ app.use((req, res, next) => {
   next();
 });
 
-// Enhanced logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+// Register routes and create server
+const server = registerRoutes(app);
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        // Safely stringify JSON response, excluding sensitive data
-        const safeResponse = { ...capturedJsonResponse };
-        delete safeResponse.password;
-        delete safeResponse.token;
-        logLine += ` :: ${JSON.stringify(safeResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
+// Global error handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    message: app.get('env') === 'development' ? err.message : 'Internal Server Error',
+    ...(app.get('env') === 'development' ? { stack: err.stack } : {})
   });
-
-  next();
 });
 
-setupAuth(app);
-
+// Setup static file serving and development environment
 (async () => {
-  const server = registerRoutes(app);
-
-  // Enhanced global error handler with better security
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    // Log error details but exclude sensitive information
-    console.error('Error details:', {
-      status,
-      message,
-      path: _req.path,
-      method: _req.method,
-      timestamp: new Date().toISOString(),
-      ...(app.get('env') === 'development' ? { stack: err.stack } : {})
-    });
-
-    // Don't send stack traces to client in production
-    const errorResponse = {
-      message: status === 500 ? "Internal Server Error" : message,
-      ...(app.get('env') === 'development' ? { stack: err.stack } : {})
-    };
-
-    res.status(status).json(errorResponse);
-  });
-
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    // Use path.join for cross-platform compatibility
     const publicPath = path.join(__dirname, '..', 'public');
     app.use(express.static(publicPath));
-
-    // Serve index.html for all routes in production
     app.get('*', (req, res) => {
       res.sendFile(path.join(publicPath, 'index.html'));
     });
   }
 
-  const startServer = async (initialPort: number) => {
-    const findAvailablePort = async (port: number): Promise<number> => {
-      try {
-        await new Promise((resolve, reject) => {
-          server.once('error', (err: any) => {
-            if (err.code === 'EADDRINUSE') {
-              server.close();
-              resolve(findAvailablePort(port + 1));
-            } else {
-              reject(err);
-            }
-          });
-          server.listen(port, "0.0.0.0", () => {
-            server.removeAllListeners('error');
-            resolve(port);
-          });
-        });
-        return port;
-      } catch (err) {
-        if (port > initialPort + 10) {
-          throw new Error('No available ports found');
-        }
-        return findAvailablePort(port + 1);
-      }
-    };
-
-    try {
-      const port = await findAvailablePort(initialPort);
-      log(`serving on port ${port}`);
-    } catch (err) {
-      console.error('Failed to start server:', err);
-      process.exit(1);
-    }
-  };
-
-  startServer(5000);
+  // Start the server
+  server.listen(5000, "0.0.0.0", () => {
+    log(`serving on port 5000`);
+  });
 })();
