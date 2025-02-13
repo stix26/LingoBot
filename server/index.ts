@@ -40,20 +40,18 @@ try {
     store: storage.sessionStore,
     name: 'connect.sid',
     cookie: {
-      secure: app.get("env") === "production",
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       sameSite: 'lax'
     }
   };
 
-  if (app.get("env") === "production") {
+  if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
   }
 
   app.use(session(sessionSettings));
-
-  // Set up authentication after session
   setupAuth(app);
 } catch (error) {
   console.error('Failed to initialize session:', error);
@@ -102,14 +100,14 @@ const server = registerRoutes(app);
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
-    message: app.get('env') === 'development' ? err.message : 'Internal Server Error',
-    ...(app.get('env') === 'development' ? { stack: err.stack } : {})
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {})
   });
 });
 
 // Setup static file serving and development environment
 (async () => {
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     const publicPath = path.join(__dirname, '..', 'public');
@@ -121,6 +119,6 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
   // Start the server
   server.listen(5000, "0.0.0.0", () => {
-    log(`serving on port 5000`);
+    log(`Server running on port 5000 (${process.env.NODE_ENV || 'development'} mode)`);
   });
 })();
