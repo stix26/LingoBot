@@ -54,3 +54,6 @@ coverage
 *.gz
 *.tar
 *.rar
+
+# Executables
+executables/

@@ -2,12 +2,12 @@ git clone https://github.com/yourusername/ai-chat-assistant.git
 cd ai-chat-assistant
 ```
 
-2. Install dependencies
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables
+3. Set up environment variables:
 ```bash
 cp .env.example .env
 ```
@@ -17,10 +17,27 @@ Edit `.env` and add your required environment variables:
   - Generate using: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 - `DATABASE_URL`: PostgreSQL connection string (required)
 
-4. Start the development server
+4. Start the development server:
 ```bash
 npm run dev
 ```
+
+### Running the Standalone Executable
+
+1. Download the appropriate executable for your platform from the releases page:
+   - Windows: `ai-chat-assistant-win.exe`
+   - macOS: `ai-chat-assistant-macos`
+   - Linux: `ai-chat-assistant-linux`
+
+2. Create a `.env` file in the same directory as the executable with the required environment variables (see above).
+
+3. Run the executable:
+   - Windows: Double-click the `.exe` file or run from command prompt
+   - macOS/Linux: 
+     ```bash
+     chmod +x ./ai-chat-assistant-*
+     ./ai-chat-assistant-*
+     ```
 
 ## Development Guidelines
 
@@ -39,6 +56,20 @@ npm run dev
    - Follow TypeScript best practices
    - Use ESLint and Prettier for formatting
    - Write meaningful commit messages
+
+## Building Executables
+
+To build the executables yourself:
+
+```bash
+# Install dependencies
+npm install
+
+# Build the executables
+node scripts/build-executable.js
+```
+
+The executables will be created in the `executables/` directory.
 
 ## Production Deployment
 
