@@ -20,7 +20,12 @@ const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingVars.length > 0) {
   throw new Error(
     `Missing required environment variables: ${missingVars.join(', ')}.\n` +
-    `Please add them to your .env file. Check .env.example for reference.`
+    `Please add them to your .env file. Check .env.example for reference.\n\n` +
+    `Required Environment Variables:\n` +
+    `- OPENAI_API_KEY: Get from https://platform.openai.com/account/api-keys\n` +
+    `- SESSION_SECRET: Generate using: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"\n` +
+    `- DATABASE_URL: PostgreSQL connection string (format: postgresql://user:password@host:port/database)\n\n` +
+    `Create a .env file in the same directory as the executable with these variables.`
   );
 }
 

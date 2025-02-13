@@ -1,7 +1,3 @@
-git clone https://github.com/yourusername/ai-chat-assistant.git
-cd ai-chat-assistant
-```
-
 2. Install dependencies:
 ```bash
 npm install
@@ -29,7 +25,19 @@ npm run dev
    - macOS: `ai-chat-assistant-macos`
    - Linux: `ai-chat-assistant-linux`
 
-2. Create a `.env` file in the same directory as the executable with the required environment variables (see above).
+2. Create a `.env` file in the same directory as the executable with the following required environment variables:
+   ```env
+   # Required: Your OpenAI API Key from https://platform.openai.com/account/api-keys
+   OPENAI_API_KEY=your_api_key_here
+
+   # Required: A secure random string for session encryption
+   # Generate using: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   SESSION_SECRET=your_session_secret_here
+
+   # Required: PostgreSQL connection string
+   # Format: postgresql://user:password@host:port/database
+   DATABASE_URL=your_database_url_here
+   ```
 
 3. Run the executable:
    - Windows: Double-click the `.exe` file or run from command prompt
@@ -38,6 +46,8 @@ npm run dev
      chmod +x ./ai-chat-assistant-*
      ./ai-chat-assistant-*
      ```
+
+   If any required environment variables are missing, the application will display an error message with instructions on how to set them up.
 
 ## Development Guidelines
 
