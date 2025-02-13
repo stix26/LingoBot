@@ -6,6 +6,12 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the directory name in a cross-platform way
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Environment variables validation
 const requiredEnvVars = ['SESSION_SECRET', 'OPENAI_API_KEY'];
@@ -49,9 +55,9 @@ app.use((req, res, next) => {
     return next();
   }
 
-  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
-           req.ip || 
-           req.socket.remoteAddress || 
+  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
+           req.ip ||
+           req.socket.remoteAddress ||
            'unknown';
 
   const now = Date.now();
@@ -62,8 +68,8 @@ app.use((req, res, next) => {
     requestData.resetTime = now + RATE_WINDOW;
   } else if (requestData.count >= RATE_LIMIT) {
     const retryAfter = Math.ceil((requestData.resetTime - now) / 1000);
-    return res.status(429).json({ 
-      error: "Too many requests", 
+    return res.status(429).json({
+      error: "Too many requests",
       message: `Please try again in ${retryAfter} seconds`,
       retryAfter
     });
@@ -142,7 +148,14 @@ setupAuth(app);
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // Use path.join for cross-platform compatibility
+    const publicPath = path.join(__dirname, '..', 'public');
+    app.use(express.static(publicPath));
+
+    // Serve index.html for all routes in production
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
   }
 
   const startServer = async (initialPort: number) => {
