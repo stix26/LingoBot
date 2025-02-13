@@ -31,28 +31,34 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration
-const sessionSettings: session.SessionOptions = {
-  secret: process.env.SESSION_SECRET!,
-  resave: false,
-  saveUninitialized: false,
-  store: storage.sessionStore,
-  cookie: {
-    secure: app.get("env") === "production",
-    httpOnly: true,
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    sameSite: 'lax'
+// Session configuration with error handling
+try {
+  const sessionSettings: session.SessionOptions = {
+    secret: process.env.SESSION_SECRET!,
+    resave: false,
+    saveUninitialized: false,
+    store: storage.sessionStore,
+    name: 'connect.sid',
+    cookie: {
+      secure: app.get("env") === "production",
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      sameSite: 'lax'
+    }
+  };
+
+  if (app.get("env") === "production") {
+    app.set("trust proxy", 1);
   }
-};
 
-if (app.get("env") === "production") {
-  app.set("trust proxy", 1);
+  app.use(session(sessionSettings));
+
+  // Set up authentication after session
+  setupAuth(app);
+} catch (error) {
+  console.error('Failed to initialize session:', error);
+  process.exit(1);
 }
-
-app.use(session(sessionSettings));
-
-// Set up authentication after session
-setupAuth(app);
 
 // Rate limiting configuration
 const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 100;
