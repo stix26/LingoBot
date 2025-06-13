@@ -32,11 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetch
   } = useQuery<User | null>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: getQueryFn<User | null>({ on401: "returnNull" }),
     retry: 1,
     retryDelay: 1000,
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
   });
