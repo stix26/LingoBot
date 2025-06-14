@@ -1,8 +1,9 @@
 import { messages, type Message, type InsertMessage, users, type User, type InsertUser, type AvatarCustomization } from "@shared/schema";
-import { db } from "./db";
+import { pool, db } from "./db";
 import { eq } from "drizzle-orm";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import connectPgSimple from "connect-pg-simple";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -92,4 +93,54 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class PgStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    const PgSession = connectPgSimple(session);
+    this.sessionStore = new PgSession({ pool });
+  }
+
+  async getMessages(): Promise<Message[]> {
+    return db.select().from(messages).orderBy(messages.createdAt);
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const [message] = await db
+      .insert(messages)
+      .values({ content: insertMessage.content, metadata: insertMessage.metadata })
+      .returning();
+    return message;
+  }
+
+  async clearMessages(): Promise<void> {
+    await db.delete(messages);
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUserAvatar(userId: number, settings: AvatarCustomization): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ avatarSettings: settings })
+      .where(eq(users.id, userId))
+      .returning();
+    if (!user) throw new Error('User not found');
+    return user;
+  }
+}
+
+export const storage: IStorage = process.env.DATABASE_URL ? new PgStorage() : new MemStorage();
