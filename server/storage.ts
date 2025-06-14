@@ -1,8 +1,10 @@
 import { messages, type Message, type InsertMessage, users, type User, type InsertUser, type AvatarCustomization } from "@shared/schema";
-import { db } from "./db";
+import { pool, db } from "./db";
 import { eq } from "drizzle-orm";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import connectPgSimple from "connect-pg-simple";
+import crypto from "node:crypto";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -20,7 +22,6 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private messages: Message[] = [];
   private users: User[] = [];
-  private nextMessageId = 1;
   private nextUserId = 1;
   sessionStore: session.Store;
 
@@ -40,7 +41,7 @@ export class MemStorage implements IStorage {
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const message: Message = {
-      id: this.nextMessageId++,
+      id: crypto.randomUUID(),
       content: insertMessage.content,
       metadata: insertMessage.metadata || { role: "user" },
       createdAt: new Date(),
@@ -92,4 +93,57 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class PgStorage implements IStorage {
+  sessionStore: session.Store;
+  private db: NonNullable<typeof db>;
+
+  constructor() {
+    if (!pool || !db) throw new Error("Postgres not initialized");
+    const PgSession = connectPgSimple(session);
+    this.sessionStore = new PgSession({ pool });
+    this.db = db;
+  }
+
+  async getMessages(): Promise<Message[]> {
+    return this.db.select().from(messages).orderBy(messages.createdAt);
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const [message] = await this.db
+      .insert(messages)
+      .values({ content: insertMessage.content, metadata: insertMessage.metadata })
+      .returning();
+    return message;
+  }
+
+  async clearMessages(): Promise<void> {
+    await this.db.delete(messages);
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await this.db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await this.db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await this.db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUserAvatar(userId: number, settings: AvatarCustomization): Promise<User> {
+    const [user] = await this.db
+      .update(users)
+      .set({ avatarSettings: settings })
+      .where(eq(users.id, userId))
+      .returning();
+    if (!user) throw new Error('User not found');
+    return user;
+  }
+}
+
+export const storage: IStorage = process.env.DATABASE_URL ? new PgStorage() : new MemStorage();

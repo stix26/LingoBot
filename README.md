@@ -35,6 +35,27 @@ LingoBot is an AI-powered chat application with secure authentication and custom
    npm run dev
    ```
 
+### Local Database with Docker
+
+If you don't have a PostgreSQL server available, you can start one using Docker:
+
+```bash
+docker-compose up -d
+```
+
+This will launch a database listening on `localhost:5432` with credentials
+`lingobot`/`lingobot`. Update your `.env` with:
+
+```bash
+DATABASE_URL=postgresql://lingobot:lingobot@localhost:5432/lingobot
+```
+
+After the database is running, initialize the schema:
+
+```bash
+npm run db:push
+```
+
 ## Running the Standalone Executable
 1. Download the appropriate executable for your platform:
    - `ai-chat-assistant-win.exe`

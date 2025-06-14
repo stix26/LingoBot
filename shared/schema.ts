@@ -1,7 +1,6 @@
-import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, jsonb, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
 
 export const messageMetadataSchema = z.object({
   sentiment: z.number().optional(),
@@ -33,7 +32,7 @@ export const users = pgTable("users", {
 });
 
 export const messages = pgTable("messages", {
-  id: integer("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid("id").primaryKey().defaultRandom(),
   content: text("content").notNull(),
   metadata: jsonb("metadata").$type<z.infer<typeof messageMetadataSchema>>().notNull().default({ role: "user" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
