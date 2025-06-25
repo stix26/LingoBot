@@ -1,8 +1,30 @@
 {
-  "name": "rest-express",
+  "name": "lingobot",
   "version": "1.0.0",
+  "description": "An AI-powered chat application with secure authentication and customizable avatars",
   "type": "module",
   "license": "MIT",
+  "keywords": [
+    "ai",
+    "chat",
+    "openai",
+    "react",
+    "express",
+    "typescript",
+    "tailwind",
+    "authentication",
+    "avatar",
+    "conversation"
+  ],
+  "author": "LingoBot Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/lingobot.git"
+  },
+  "homepage": "https://github.com/yourusername/lingobot#readme",
+  "bugs": {
+    "url": "https://github.com/yourusername/lingobot/issues"
+  },
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",

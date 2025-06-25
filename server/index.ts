@@ -118,7 +118,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   }
 
   // Start the server
-  server.listen(5000, "0.0.0.0", () => {
-    log(`Server running on port 5000 (${process.env.NODE_ENV || 'development'} mode)`);
+  server.listen(3000, "0.0.0.0", () => {
+    log(`Server running on port 3000 (${process.env.NODE_ENV || 'development'} mode)`);
   });
 })();
